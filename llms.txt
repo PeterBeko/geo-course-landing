@@ -1,0 +1,19 @@
+# GEO Decision Course
+
+GEO Decision Course is a waitlist landing page for an AuditUniversePro course about AI visibility diagnosis and business decision-making.
+
+The page offers a free AI Visibility Triage, a 15-minute diagnostic structure for separating AI cannibalization, content decay and technical visibility issues.
+
+The course is built for founders, marketers, consultants and operators who need clearer evidence before spending on AI search or SEO fixes.
+
+The course does not guarantee AI rankings. AI answers are dynamic and cannot be guaranteed.
+
+AuditUniversePro is the provider. The main site is https://audituniversepro.com/.
+
+Canonical URL: https://course.audituniversepro.com/
+
+Important sections:
+- Free AI Visibility Triage waitlist form: https://course.audituniversepro.com/#waitlist
+- Course outline: https://course.audituniversepro.com/#course
+- Prime Steak & Wine case evidence: https://course.audituniversepro.com/#proof
+- FAQ: https://course.audituniversepro.com/#faq
