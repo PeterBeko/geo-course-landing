@@ -556,6 +556,13 @@ details p {
   padding: clamp(1.25rem, 4vw, 2rem);
 }
 
+.founder-card h2 {
+  max-width: 100%;
+  font-size: clamp(2.35rem, 5vw, 4.15rem);
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+}
+
 .principles {
   display: grid;
   gap: 0.8rem;
