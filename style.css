@@ -222,6 +222,10 @@ h2 {
   letter-spacing: 0;
 }
 
+.proof-copy h2 {
+  font-size: clamp(1.76rem, 5.6vw, 3.76rem);
+}
+
 h3 {
   margin-bottom: 0.65rem;
   color: var(--navy-dark);
