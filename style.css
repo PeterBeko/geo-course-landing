@@ -411,6 +411,10 @@ details {
   font-weight: 900;
 }
 
+.module-item-featured span {
+  font-size: 1.6rem;
+}
+
 .reason-card p,
 .module-item p,
 .studio-strip p,
