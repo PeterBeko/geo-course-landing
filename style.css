@@ -207,6 +207,13 @@ nav a:hover,
   text-transform: uppercase;
 }
 
+.hero .eyebrow,
+.course-section .eyebrow,
+.faq-section .eyebrow {
+  font-size: 1.52rem;
+  line-height: 1.1;
+}
+
 h1,
 h2,
 h3,
