@@ -26,17 +26,3 @@ document.querySelectorAll('a[href^="#"]').forEach((link) => {
     target.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 });
-
-const fallbackForm = document.querySelector(".fallback-form");
-
-if (fallbackForm) {
-  fallbackForm.addEventListener("submit", (event) => {
-    if (fallbackForm.action.includes("example.com")) {
-      event.preventDefault();
-      const note = fallbackForm.querySelector(".form-note");
-      if (note) {
-        note.textContent = "MailerLite is not connected yet. This placeholder form is ready for the embed code.";
-      }
-    }
-  });
-}
