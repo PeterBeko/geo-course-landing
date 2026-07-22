@@ -708,6 +708,46 @@ details p {
   color: rgba(255, 255, 255, 0.76);
 }
 
+.pricing-card {
+  margin: 0 0 1.25rem;
+  padding: clamp(1rem, 3vw, 1.3rem);
+  border: 1px solid rgba(229, 201, 119, 0.32);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.pricing-card .pricing-label {
+  margin: 0 0 0.45rem;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pricing-card h3 {
+  margin: 0 0 0.8rem;
+  color: var(--white);
+  font-size: clamp(1.18rem, 2vw, 1.45rem);
+  line-height: 1.1;
+}
+
+.pricing-card p {
+  margin: 0.65rem 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.pricing-card .pricing-note {
+  padding-top: 0.8rem;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.82rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .fit-panel .btn {
   width: 100%;
 }
