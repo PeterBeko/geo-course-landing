@@ -1,0 +1,1423 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2.3 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 2.3 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 2.3 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 2.3 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L2_3_Q1",
+        "question_text":  "What is the main goal of Lesson 2.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To prove that more measurement is always safer"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To decide when measurement increases decision safety and when it becomes harmful"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To replace governance with trend dashboards"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To build a new AI citation log"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Lesson 2.3 focuses on deciding when measurement actually improves decision safety and when it turns into harmful delay."
+    },
+    {
+        "id":  "L2_3_Q2",
+        "question_text":  "What is the central decision question in Lesson 2.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Which plugin score should be reported weekly?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "How many exports are needed before action is allowed?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "When does measurement improve decision quality, and when does it become delay disguised as rigor?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Which AI model provides the best trend data?"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The central question is whether measurement is sharpening a real decision or simply creating the appearance of rigor while slowing action."
+    },
+    {
+        "id":  "L2_3_Q3",
+        "question_text":  "What is the executive frame of the lesson?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Measurement is useful only when it changes a real decision"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "All uncertainty should be removed before acting"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Trend data is always more valuable than a baseline"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Leadership should avoid escalation whenever possible"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The executive frame is simple: measurement is only useful when it changes a real decision. Otherwise it becomes overhead."
+    },
+    {
+        "id":  "L2_3_Q4",
+        "question_text":  "Which statement best describes the measurement trade-off in this lesson?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "More measurement lowers cost while raising clarity"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Measurement reduces uncertainty, but it also carries time cost, reporting drag, and false precision risk"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Only cost matters because uncertainty is unavoidable"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Interpretability risk disappears when trend data is added"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson treats measurement as a trade-off. It can reduce uncertainty, but it also introduces time cost, reporting drag, and false precision risk."
+    },
+    {
+        "id":  "L2_3_Q5",
+        "question_text":  "What does Decision Threshold One mean?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Measure whenever a stakeholder requests more certainty"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Measure when missing data can plausibly change the decision"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Measure only when the plugin score drops below a threshold"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Measure until every metric agrees with leadership intuition"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Decision Threshold One means measure when the missing data could plausibly change the next decision. Measurement should be tied to decision movement."
+    },
+    {
+        "id":  "L2_3_Q6",
+        "question_text":  "What does Decision Threshold Two mean?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Stop only when the business has already lost traffic"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Trend data should be collected until it becomes interesting"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Measurement is harmful when it decorates uncertainty without reducing it"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Escalation should be avoided by collecting more proxies"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Decision Threshold Two marks the point where measurement becomes harmful. If it only decorates uncertainty without reducing it, it should stop."
+    },
+    {
+        "id":  "L2_3_Q7",
+        "question_text":  "What does Decision Threshold Three mean?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Escalate whenever a plugin report contains warnings"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Escalate only after three failed measurement cycles"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Escalate trend analysis to a larger dashboard"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Escalate when leadership judgment is needed and the decision cannot wait"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Decision Threshold Three identifies the point where judgment must be escalated. If the decision cannot wait, leadership input matters more than another cycle of data."
+    },
+    {
+        "id":  "L2_3_Q8",
+        "question_text":  "Why does Lesson 2.3 say baseline and trend matter differently?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because baseline proves causality and trend proves business impact"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because trend data replaces the need for a decision question"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because baseline is only useful for screenshots"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because baseline describes state and trend describes movement, but neither matters unless they sharpen a decision"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Baseline describes state and trend describes movement, but neither has value in isolation. They matter only when they sharpen the decision."
+    },
+    {
+        "id":  "L2_3_Q9",
+        "question_text":  "What is the first operational step in the lesson workflow?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Run the plugin across multiple weeks"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Ask leadership for final approval"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Write the decision first before expanding measurement"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Rate time cost immediately"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The workflow starts by writing the decision first. That keeps measurement attached to action rather than to abstract curiosity."
+    },
+    {
+        "id":  "L2_3_Q10",
+        "question_text":  "What should be identified right after writing the decision?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "The final stop rule"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The blocking uncertainty"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The new dashboard layout"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The best external benchmark"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "After the decision is written, the next task is identifying the blocking uncertainty. That tells the team what they actually need to learn."
+    },
+    {
+        "id":  "L2_3_Q11",
+        "question_text":  "What is the purpose of the Measurement Backlog Triage in Lesson 2.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To convert every measurement idea into a recurring report"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To prioritize screenshots over structured exports"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To separate high-value, low-value, and blocked measurement requests"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To eliminate the need for escalation"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The Measurement Backlog Triage separates requests by usefulness. It helps distinguish what changes decisions from what only adds reporting noise."
+    },
+    {
+        "id":  "L2_3_Q12",
+        "question_text":  "Which type of measurement request should usually be classified as high-value?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A request that makes reporting look more complete"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A request that resolves a real uncertainty and can change the next decision"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A request that satisfies curiosity but changes nothing"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A request that adds a vanity metric for leadership"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "A request is high-value when it resolves a real uncertainty and can change what happens next. That is the lesson\u0027s standard for useful measurement."
+    },
+    {
+        "id":  "L2_3_Q13",
+        "question_text":  "Which type of measurement request should usually be blocked?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "One that is tied to a real escalation choice"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "One that reduces uncertainty about prioritization"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "One that can be completed quickly"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "One that creates false precision or invites overinterpretation"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "A blocked request is one that creates false precision or invites overinterpretation. The lesson treats those requests as harmful, not neutral."
+    },
+    {
+        "id":  "L2_3_Q14",
+        "question_text":  "What are the four tests used to rate each new measurement request?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Traffic, rankings, citations, and conversions"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Decision value, time cost, interpretability risk, and escalation need"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Baseline, trend, plugin score, and report frequency"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Visibility, authority, freshness, and schema quality"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Each measurement request is rated through four tests: decision value, time cost, interpretability risk, and escalation need. That framework keeps measurement accountable."
+    },
+    {
+        "id":  "L2_3_Q15",
+        "question_text":  "When should a stop rule be applied?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "When more measurement can still change prioritization"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "When the team wants a nicer-looking report"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "When measurement no longer increases decision safety"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "When baseline data has never been collected"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "A stop rule should be applied once more measurement no longer improves decision safety. That is the point where continued data collection becomes delay."
+    },
+    {
+        "id":  "L2_3_Q16",
+        "question_text":  "What is the plugin\u0027s role in Lesson 2.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To act as direct business proof"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To provide baseline and trend context such as structural change, readiness movement, and repeated patterns"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To decide automatically whether to continue or stop"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To replace the decision tree"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The plugin provides baseline and trend context such as structural change, readiness movement, and repeated patterns. It does not replace decision judgment."
+    },
+    {
+        "id":  "L2_3_Q17",
+        "question_text":  "Which statement best reflects the lesson\u0027s view of plugin movement?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Plugin movement is enough to justify continued measurement"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Plugin movement proves the business problem is solved"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Plugin movement should always trigger escalation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Plugin movement is useful context, but not a reason to keep measuring if the decision is already clear"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Plugin movement is useful context, but it does not justify endless measurement on its own. If the decision is already clear, more tracking is unnecessary."
+    },
+    {
+        "id":  "L2_3_Q18",
+        "question_text":  "What is the correct logic of the Measurement Decision Tree?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Continue for high-value requests; stop for all low-value requests; never escalate"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Continue until all risk is removed; stop only after three exports; escalate when time cost is low"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Continue if more measurement can change the decision; stop if it only confirms what you know; escalate if ambiguity stays high and the decision cannot wait"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Continue whenever a trend exists; stop when the plugin score is low; escalate when leadership asks questions"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The decision tree says continue if more measurement can change the decision, stop if it only confirms what is already known, and escalate if ambiguity remains high."
+    },
+    {
+        "id":  "L2_3_Q19",
+        "question_text":  "What are the practical outputs of Lesson 2.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A citation log, a source memo, and an FAQ schema guide"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A readiness dashboard and a revenue attribution model"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A trend screenshot archive and a reporting calendar"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A Measurement Decision Tree, a Measurement Backlog Triage table, and a Stop Rules \u0026 Escalation framework"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson outputs an operating package: a decision tree, a backlog triage table, and a stop-rules-plus-escalation framework. These tools govern measurement effort."
+    },
+    {
+        "id":  "L2_3_Q20",
+        "question_text":  "What is the correct final takeaway from Lesson 2.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Trend data is always worth collecting once it exists"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Escalation means the measurement system failed"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A baseline is enough to avoid all governance decisions"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Measure until measurement stops increasing decision safety; after that, more data is delay"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The final takeaway is that measurement should continue only while it increases decision safety. After that point, more data is simply delay."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 2.3 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 2.3 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 2.3.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 2.3 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 2.3 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 2.3 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
