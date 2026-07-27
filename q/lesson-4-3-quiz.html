@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4.3 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 4.3 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 4.3 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 4.3 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L4_3_Q1",
+        "question_text":  "What is the central decision discipline taught in Lesson 4.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Analyze LLM logic only until the decision becomes good enough to act"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Always perform deep LLM analysis before changing a page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Use the plugin score as the final business priority"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Reverse-engineer the hidden model internals before making recommendations"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Lesson 4.3 frames modeling as a decision-support activity: deeper analysis is useful only when it can change a decision."
+    },
+    {
+        "id":  "L4_3_Q2",
+        "question_text":  "What is the main decision question in Lesson 4.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Which LLM is best for all GEO audits?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "When does modeling cost more than it returns?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Which schema type guarantees AI citation?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "How can we prove the exact internal model mechanism?"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson asks when deeper modeling creates business value and when it becomes more costly than useful."
+    },
+    {
+        "id":  "L4_3_Q3",
+        "question_text":  "Which three elements form the ROI-of-analysis frame?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Prompt length, model speed, and citation count"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Page title, H1 tag, and canonical URL"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Decision value, uncertainty value, and analysis cost"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Traffic volume, backlinks, and ad budget"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The ROI-of-analysis frame checks what decision improves, what uncertainty could change action, and what analysis effort costs."
+    },
+    {
+        "id":  "L4_3_Q4",
+        "question_text":  "In Lesson 4.3, what does \u0027modeling LLM logic\u0027 mean?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Claiming to know the full hidden reasoning path"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Replacing the business backlog with a prompt library"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Treating every plugin issue as a ranking factor"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Mapping visible behavior into a decision model using prompts, answer modes, source patterns, plugin signals, repeated observations, and business stakes"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson explicitly avoids reverse-engineering hidden model internals and instead uses visible signals to support decisions."
+    },
+    {
+        "id":  "L4_3_Q5",
+        "question_text":  "When is Quick Decision Support usually enough?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "When the action requires hidden-mechanism proof"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "When the issue involves a business-critical page with conflicting signals"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "When the signal is directly observable, the action is low risk, and the fix improves user value or machine readability"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "When competitors repeatedly appear and the client needs a revenue-impact decision"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Quick mode is appropriate when the signal is visible, the action is reversible or low risk, and causal proof is not required."
+    },
+    {
+        "id":  "L4_3_Q6",
+        "question_text":  "Which item is a good example of a Quick Decision Support action in the Isabella practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Add a concise TL;DR summary to improve answerability"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Conclude that AI systems ignored the page because of missing TL;DR"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Rebuild the entire brand strategy from one plugin report"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Claim that FAQPage will guarantee recommendations"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The practical treats TL;DR, FAQPage, alt text, and freshness improvements as low-risk quick-mode backlog items when phrased safely."
+    },
+    {
+        "id":  "L4_3_Q7",
+        "question_text":  "When is Deep Analysis justified in Lesson 4.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Whenever the plugin score is below 50"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Whenever a report contains more than five issues"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Whenever a single prompt gives a surprising answer"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "When the uncertainty could change a high-value decision, patterns repeat, signals conflict, or revenue, brand, legal, or trust impact is material"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Deep analysis needs a decision reason, such as repeated patterns, conflicting evidence, or high-stakes business impact—not curiosity alone."
+    },
+    {
+        "id":  "L4_3_Q8",
+        "question_text":  "What does the Value of Information lens ask?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Can we collect more data regardless of cost?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Would better information change the action, and would that improved action matter enough to justify the cost?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Can the plugin produce a higher score after every edit?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Can we make the report longer to look more rigorous?"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Value-of-information thinking asks whether learning more can change a valuable action and whether the benefit justifies the cost."
+    },
+    {
+        "id":  "L4_3_Q9",
+        "question_text":  "What is the proper role of the plugin export in Lesson 4.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To prove the hidden reason why an LLM selected or ignored a page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To automatically decide every implementation priority"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To provide observed signals that can be mapped into possible actions, analysis mode, priority, stop rules, and safe recommendations"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To replace the business context and decision authority"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The plugin export becomes a decision input for backlog mapping, not a task list or causal proof engine."
+    },
+    {
+        "id":  "L4_3_Q10",
+        "question_text":  "What is the intended output of Plugin Export → Backlog Mapping?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A pile of raw observations"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A guaranteed AI visibility forecast"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A hidden-mechanism explanation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A prioritized backlog, not a pile of observations"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson converts plugin signals into prioritized, testable work rather than leaving them as unfiltered observations."
+    },
+    {
+        "id":  "L4_3_Q11",
+        "question_text":  "Which factors should influence backlog prioritization in Lesson 4.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Only the lowest plugin score"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only the easiest implementation tasks"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Business impact, user value, machine-readability gain, implementation effort, reversibility, and evidence strength"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only whether a recommendation sounds advanced"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The backlog should not be dominated by one score; priority depends on value, effort, risk, reversibility, and evidence strength."
+    },
+    {
+        "id":  "L4_3_Q12",
+        "question_text":  "What is the main proxy risk discussed in Lesson 4.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "The score becomes the target, leading to artificial structure, overfitting to the audit, and unsupported AI-impact claims"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The page becomes easier for users to understand"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The report becomes shorter and more decision-focused"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The team stops making hidden-mechanism claims"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The lesson warns that optimizing for the proxy score can lead to score chasing instead of improving user value, machine readability, and auditability."
+    },
+    {
+        "id":  "L4_3_Q13",
+        "question_text":  "Which path is presented as the better alternative to proxy optimization?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Chase the score, add artificial structure, and claim AI impact"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Avoid all testing because causal proof is impossible"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Rewrite every page based only on one plugin score"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Improve user value, improve machine readability, retest decision-relevant signals, and keep evidence language safe"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The true path treats signals as decision inputs and focuses on real value, readability, retesting, and safe claims."
+    },
+    {
+        "id":  "L4_3_Q14",
+        "question_text":  "Which of the following is a stop rule for over-analysis?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Continue analyzing until the report feels complete"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Deeply model every low-risk issue"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Stop when the decision will not change or the analysis cost exceeds likely value"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Treat every low score as proof of AI absence"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson stops deeper analysis when the mechanism is hidden, the decision will not change, the cost exceeds likely value, there is no authority to act, or the finding only improves a score."
+    },
+    {
+        "id":  "L4_3_Q15",
+        "question_text":  "What should happen after each new observation in the Sequential Decision Loop?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Always move into deep analysis"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Decide whether to act, collect more evidence, or stop"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Rewrite the whole strategy from scratch"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Ignore the backlog until all uncertainty is removed"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The sequential loop is: observe signal, estimate decision value, choose quick/deep mode, act/test/stop, and update backlog priority."
+    },
+    {
+        "id":  "L4_3_Q16",
+        "question_text":  "How should the Isabella practical interpret SEO 86, GEO 31, and Overall 59?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "As proof that AI systems ignored Isabella"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "As guarantees of future recommendation"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "As instructions to optimize only for the score"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "As basic context and prioritization signals, not causal explanations"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical starts from the scores as context but avoids treating them as causes or hidden-mechanism proof."
+    },
+    {
+        "id":  "L4_3_Q17",
+        "question_text":  "In the Isabella Decision Split, which items are mostly quick-mode backlog actions?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Add TL;DR, add FAQPage, improve alt text, add freshness signals, and improve authority context"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Prove the internal LLM selection mechanism"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Pause all action until competitors are fully reverse-engineered"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Claim that one report explains why AI ignored the page"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The practical treats visible, low-risk improvements as quick-mode work, while reserving deep analysis for repeated absence, competitor patterns, or strategic template decisions."
+    },
+    {
+        "id":  "L4_3_Q18",
+        "question_text":  "In the backlog row example, why does Missing TL;DR become a high-priority quick action?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because it proves the cause of AI absence"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because adding a summary guarantees citations"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because the signal is visible, the action is low effort, and it improves answerability / machine readability"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because it requires expensive deep analysis first"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The practical frames Missing TL;DR as visible, low effort, low risk, and useful for answerability, making it a high-priority quick action."
+    },
+    {
+        "id":  "L4_3_Q19",
+        "question_text":  "What is the safe recommendation for the FAQPage backlog example?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "FAQ schema will make AI systems recommend the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The page was ignored because FAQPage was missing"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "FAQPage proves source selection conditions"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A structured FAQ may make common product questions easier to extract and test across answer modes"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical keeps the FAQPage recommendation safe by saying it may improve extraction and should be tested, not that it guarantees recommendation."
+    },
+    {
+        "id":  "L4_3_Q20",
+        "question_text":  "What is the final practical takeaway of Lesson 4.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Every plugin issue deserves deep analysis"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The best GEO workflow is to optimize only for the plugin score"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Plugin signal → decision filter → backlog priority → safe action"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Hidden model mechanisms can be proven from one report"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The practical closes by turning plugin signals into a decision filter, backlog priority, and safe action: model only until the decision is good enough to act."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 4.3 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 4.3 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 4.3.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 4.3 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 4.3 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 4.3 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
