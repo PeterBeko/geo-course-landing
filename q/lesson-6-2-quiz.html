@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6.2 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 6.2 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 6.2 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 6.2 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L6_2_Q1",
+        "question_text":  "What is the central purpose of Lesson 6.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To define Narrative Attribution as the executive KPI layer for GEO progress"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To replace GEO strategy with raw citation counting"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To prove that one AI answer guarantees future visibility"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To remove qualitative interpretation from KPI reporting"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Lesson 6.2 introduces Narrative Attribution as the higher-level KPI that organizes citations, mentions, recommendations, and other proxies under correct-context attribution."
+    },
+    {
+        "id":  "L6_2_Q2",
+        "question_text":  "Why are mention count, citation count, plugin score, and one impressive answer considered weak standalone KPIs?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because they are never useful as supporting signals"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because they always prove business value"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because they can create false confidence if the answer carries the wrong context, claim, or decision role"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because they remove the need for evidence packages"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson calls this the proxy trap: raw visibility signals are useful, but they do not prove that the brand narrative was attributed correctly."
+    },
+    {
+        "id":  "L6_2_Q3",
+        "question_text":  "What does Narrative Attribution mean in Lesson 6.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "AI-visible answers mention the brand as often as possible"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "AI-visible answers connect the brand, page, product, or claim to the correct context, meaning, source evidence, and decision role"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "AI-visible answers copy the full product page verbatim"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "AI-visible answers guarantee recommendation in all future prompts"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Narrative Attribution is visibility with the right attribution and interpretation, not simple presence in an answer."
+    },
+    {
+        "id":  "L6_2_Q4",
+        "question_text":  "Which four properties define the executive KPI frame in Lesson 6.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Correct entity, correct claim, correct context, and correct decision role"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Keyword density, backlink count, page speed, and schema count"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Mention count, model name, token count, and temperature"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Traffic spike, one screenshot, competitor rank, and CTA color"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The executive KPI frame asks whether the brand is not just visible, but understood correctly in the right decision context."
+    },
+    {
+        "id":  "L6_2_Q5",
+        "question_text":  "Which scoring scale is used in the Narrative Attribution Scorecard?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "1 = weak, 5 = medium, 10 = guaranteed"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A = traffic, B = rankings, C = revenue"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Pass / fail only, with no partial state"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "0 = absent / wrong, 1 = partial, 2 = strong"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The scorecard translates qualitative attribution judgment into a controlled numeric signal using 0, 1, and 2 point levels."
+    },
+    {
+        "id":  "L6_2_Q6",
+        "question_text":  "Which five dimensions are scored in the Lesson 6.2 scorecard?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Entity Alignment, Claim Accuracy, Context Fit, Attribution Clarity, and Decision Usefulness"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Speed, accessibility, layout, schema count, and backlinks"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Prompt length, answer length, model cost, token count, and latency"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Keyword rank, CPC, bounce rate, CTR, and pageviews"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "These five dimensions measure whether the observed answer carried the right narrative in a decision-ready way."
+    },
+    {
+        "id":  "L6_2_Q7",
+        "question_text":  "What is the role of provenance thinking in Lesson 6.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To claim full access to hidden AI ranking mechanisms"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To replace the need for observation logs"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To make the evidence chain traceable by asking what claim is carried, which entity is attached, and what source role is visible"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To prove that every visible mention is accurate attribution"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Provenance thinking helps avoid treating a nice-looking mention as reliable attribution unless the claim, entity, source role, and evidence package are traceable."
+    },
+    {
+        "id":  "L6_2_Q8",
+        "question_text":  "What does transparency mean in the Lesson 6.2 reporting logic?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Making the audit logic inspectable by separating observed text, evidence set, score, confidence, and what cannot be proven"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Claiming complete access to the model\u0027s hidden reasoning"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Publishing only the final score without context"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Treating all AI answers as transparent by default"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The lesson uses transparency as audit discipline: report what was observed, what evidence was used, what was inferred, and where limits remain."
+    },
+    {
+        "id":  "L6_2_Q9",
+        "question_text":  "Which quality guardrail does Lesson 6.2 apply to Narrative Attribution?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Create AI-shaped content only to force model behavior"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Strengthen helpful content, accurate claims, source clarity, trust signals, and people-first usefulness instead of manipulating outputs"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Ignore claim accuracy if the brand appears"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Remove trust signals so the answer becomes shorter"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson keeps the KPI aligned with helpful, reliable, people-first content and avoids treating narrative optimization as output manipulation."
+    },
+    {
+        "id":  "L6_2_Q10",
+        "question_text":  "What is the correct Narrative Attribution workflow from the theory video?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Ask one prompt, screenshot the answer, declare success, and stop"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Raise the plugin score, skip evidence, and guarantee future recommendations"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Define target narrative, define acceptable contexts, build evidence package, observe answers, score attribution quality, then decide"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Rewrite all content, ignore context, and remove reporting limits"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The operating workflow moves from target narrative and context definition to evidence, observation, scoring, and decision."
+    },
+    {
+        "id":  "L6_2_Q11",
+        "question_text":  "Why must the target narrative be defined before scoring?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because the KPI cannot be evaluated reliably if the intended entity, claim, context, boundary, and decision role are vague"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because scoring should happen before the business question is known"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because target narratives replace all evidence packages"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because vague narratives make reporting safer"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "A clear target narrative defines what the answer should carry and what it must not imply."
+    },
+    {
+        "id":  "L6_2_Q12",
+        "question_text":  "In the Isabella practical, which target narrative is safest?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Isabella is officially affiliated with Baccarat Rouge 540"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Isabella is a Baccarat Rouge 540-inspired fragrance alternative with visible scent-note evidence, clear limitations, and no exact-replica claim"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Isabella is guaranteed to smell identical for every user"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Isabella is universally the best perfume choice"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The practical uses a bounded, evidence-aware target narrative that preserves the inspired-by relationship without overclaiming."
+    },
+    {
+        "id":  "L6_2_Q13",
+        "question_text":  "What belongs in the acceptable-context step?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Correct target context, acceptable adjacent context, weak or incomplete context, wrong context, and harmful context"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only high-traffic keywords and plugin score bands"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Only model names and answer length categories"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only rankings, revenue, and ad spend"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Context classes prevent treating every mention as success. Correct-context attribution is what counts toward the executive KPI."
+    },
+    {
+        "id":  "L6_2_Q14",
+        "question_text":  "What should be included in the evidence package?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Only the AI answer screenshot"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only the plugin score"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Source page snapshot, structured data, claim and disclaimer map, trust signals, external references or review context, and observation log"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only the final executive conclusion"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson states that there should be no score without an evidence package, because the KPI must remain auditable."
+    },
+    {
+        "id":  "L6_2_Q15",
+        "question_text":  "What does the practical observed-answer interpretation say about Isabella?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It proves Isabella is the best possible recommendation"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It proves future AI systems will always recommend Isabella"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It shows Isabella should be removed from comparison contexts"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It shows partial Narrative Attribution: Isabella appears in a relevant context, but decision strength is limited by weaker proof"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical interprets the observed answer as partial attribution: the entity is present and the context is relevant, but evidence and decision usefulness need strengthening."
+    },
+    {
+        "id":  "L6_2_Q16",
+        "question_text":  "What does a 7/10 Narrative Attribution Score mean in the Lesson 6.2 practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Yellow / Partial Attribution: the narrative is present and context is mostly correct, but evidence and decision usefulness are not strong enough"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Guaranteed future AI recommendation"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Full green KPI success"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Proof that no revision is needed"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The numeric score is useful, but it does not prove future recommendation or guarantee visibility."
+    },
+    {
+        "id":  "L6_2_Q17",
+        "question_text":  "Why is one observed answer not enough to form a KPI trend?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because a single answer is always wrong"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because a KPI trend requires multiple observations such as correct-context attribution rate, entity alignment rate, claim accuracy rate, unsafe attribution rate, and Green / Yellow / Red distribution"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because qualitative judgment should never be scored"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because executive decisions cannot use observations"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The practical distinguishes a single canary observation from a reporting cycle built on multiple observations."
+    },
+    {
+        "id":  "L6_2_Q18",
+        "question_text":  "What two mistakes does the Lesson 6.2 scorecard help prevent?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "High traffic and low traffic"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Long prompts and short prompts"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "False win and false failure"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Organic search and paid search"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The scorecard prevents celebrating weak wins just because the brand was mentioned, and prevents rejecting useful partial signals because the brand was not ranked first."
+    },
+    {
+        "id":  "L6_2_Q19",
+        "question_text":  "Which reporting sentence is safe for the Isabella example?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "In this observed answer, the target narrative was partially carried; entity and context were correct, but attribution clarity and decision usefulness need strengthening"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "AI understands Isabella perfectly now"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "This guarantees future recommendations"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "This proves complete GEO success"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Safe reporting preserves uncertainty and explains the observed attribution quality without claiming hidden mechanism access or future guarantees."
+    },
+    {
+        "id":  "L6_2_Q20",
+        "question_text":  "What is the final practical formula for Narrative Attribution KPI?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Qualitative attribution judgment + numeric scorecard + governance guardrails"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Mention count + screenshot + confidence claim"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Plugin score + traffic chart + guaranteed recommendation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Prompt trick + model name + hidden mechanism proof"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The practical closes by defining Narrative Attribution KPI as a controlled system that combines qualitative interpretation, numeric scoring, and governance safeguards."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 6.2 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 6.2 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 6.2.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 6.2 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 6.2 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 6.2 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
