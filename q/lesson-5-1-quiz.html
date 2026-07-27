@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 5.1 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 5.1 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 5.1 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 5.1 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L5_1_Q1",
+        "question_text":  "What is the central idea of Lesson 5.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A page is not only crawled; it may be parsed, chunked, retrieved, interpreted, and synthesized"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "AI systems only need the same crawl and ranking signals as classic search"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Structured data guarantees AI recommendation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Plugin scores prove how an AI system used a page"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Lesson 5.1 introduces AI-style processing as more than crawling: page content may be parsed, segmented, retrieved, interpreted, and synthesized."
+    },
+    {
+        "id":  "L5_1_Q2",
+        "question_text":  "What is the decision question of Lesson 5.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Which plugin score should always be optimized first?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "What does AI-style processing mean for page structure?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Which AI model should be trusted for all page audits?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "How can we prove the exact internal reasoning of an AI system?"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson asks what AI-style processing changes about how we audit page structure, not how to prove hidden AI behavior."
+    },
+    {
+        "id":  "L5_1_Q3",
+        "question_text":  "Which sequence best represents the classic search frame in the lesson?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Parse, chunk, retrieve, interpret, synthesize"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Summarize, cite, recommend, convert"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Schema, FAQ, alt text, author bio"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Crawl, index, rank, result"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The classic search frame is presented as crawl, index, rank, and result, while AI-style answers may involve additional processing layers."
+    },
+    {
+        "id":  "L5_1_Q4",
+        "question_text":  "Which sequence best represents the AI-style answer frame in the lesson?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Discover, crawl, render, index, rank"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Prompt, publish, backlink, convert, rank"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Audit, score, optimize, guarantee, cite"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Parse, chunk, retrieve, interpret, synthesize"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The AI-style answer frame is shown as parse, chunk, retrieve, interpret, and synthesize."
+    },
+    {
+        "id":  "L5_1_Q5",
+        "question_text":  "What is the difference between the access layer and the interpretation layer?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Access is about whether the page can be discovered and indexed; interpretation is about whether content can be segmented, understood, attributed, and reused"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Access is about social media traffic; interpretation is about ad targeting"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Access proves that AI systems will cite the page; interpretation proves ranking"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Access replaces structured data; interpretation replaces human review"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The lesson separates classic technical access from the GEO layer of interpretation and reuse."
+    },
+    {
+        "id":  "L5_1_Q6",
+        "question_text":  "What does the lesson mean by AI-readability?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A guarantee that AI systems will cite or recommend the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The degree to which page structure and context support safer AI-style interpretation"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A replacement for classic crawling, rendering, and indexing checks"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A plugin score that proves how an AI system used the page"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "AI-readability is not a single score and not proof of AI behavior. It refers to whether page structure, context, and machine-readable support help AI-style systems interpret the page more safely."
+    },
+    {
+        "id":  "L5_1_Q7",
+        "question_text":  "What is the fragment problem?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "The page cannot be indexed unless every image has a caption"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "AI systems always read an entire page as one complete unit"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Every fragment proves source selection"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Extracted passages, chunks, fields, or sections may lose context and become easier to misunderstand"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson warns that AI-style systems may work with fragments, so each section should make sense when extracted alone."
+    },
+    {
+        "id":  "L5_1_Q8",
+        "question_text":  "What function does HTML and page structure serve in Lesson 5.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It guarantees that the page will be ranked first"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It prevents AI systems from synthesizing content"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It replaces the need for page content"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It helps define boundaries, roles, relationships, and extraction context"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Headings, sections, lists, tables, alt text, captions, data, and links support interpretation by defining boundaries and relationships."
+    },
+    {
+        "id":  "L5_1_Q9",
+        "question_text":  "How should structured data be framed in this lesson?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "As a useful machine-readable signal, not a guarantee of AI recommendation"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "As proof that the AI selected the page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "As a replacement for visible page content"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "As unnecessary if the page has images"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Structured data may help express entities, offers, authors, reviews, and relationships, but it does not guarantee citation or recommendation."
+    },
+    {
+        "id":  "L5_1_Q10",
+        "question_text":  "What is the purpose of the AI vs Search Processing Map?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To prove the hidden ranking mechanism"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To compare where a page is accessible and where it may become ambiguous for AI-style processing"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To replace the plugin report"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To guarantee that a page will be included in AI answers"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The map compares classic access steps with AI-style processing steps and identifies where interpretation ambiguity may occur."
+    },
+    {
+        "id":  "L5_1_Q11",
+        "question_text":  "What does Page Readability Audit Step 1 check?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Only backlink authority and ad budget"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only image size and page speed"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Entity clarity and section clarity, including whether the main entity and page purpose are explicit"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Whether the plugin score is high enough to prove AI visibility"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Step 1 checks entity and section clarity: the main entity, page purpose, headings, standalone sections, and grouping of related details."
+    },
+    {
+        "id":  "L5_1_Q12",
+        "question_text":  "What does Page Readability Audit Step 2 check?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Answerability through elements such as summaries, definitions, FAQ blocks, comparisons, tables, and evidence blocks"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Whether the AI already cited the page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Whether the page has the highest possible score"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Whether every section is written by an AI model"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Step 2 asks which sections would answer which user questions and checks answerability elements such as TL;DR, definitions, FAQ, comparisons, tables, and evidence blocks."
+    },
+    {
+        "id":  "L5_1_Q13",
+        "question_text":  "What is the proper role of the plugin report in the Lesson 5.1 practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To prove how an AI system used the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To certify future ranking outcomes"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To replace the page readability audit framework"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To surface visible structure signals that may indicate interpretation risk"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical uses the plugin report as an observation layer for visible structure and interpretation risks, not as proof of AI behavior."
+    },
+    {
+        "id":  "L5_1_Q14",
+        "question_text":  "Which mapping is correct in the Plugin → AI Interpretation Risk Mapping?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Missing TL;DR → Summarization risk"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "No FAQ → Guaranteed recommendation"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Missing alt text → Proof of source selection"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "No sources → Higher ranking guarantee"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The lesson maps Missing TL;DR to summarization risk, while avoiding causal or guarantee-style claims."
+    },
+    {
+        "id":  "L5_1_Q15",
+        "question_text":  "What is the safe interpretation of a missing FAQPage signal?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It proves that AI systems ignored the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It guarantees that the page will be recommended after adding FAQ schema"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It creates a Q\u0026A extraction risk; structured product questions may improve answerability and should be tested"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It means classic search cannot crawl the page"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The safe wording treats missing FAQPage as an answerability and extraction risk, not as proof of AI absence or a guaranteed fix."
+    },
+    {
+        "id":  "L5_1_Q16",
+        "question_text":  "In the practical Interpretation Risk Map, what does Missing TL;DR / Summary indicate?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A guaranteed citation loss"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A weak or missing summarization entry point"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A technical crawl failure"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A reason to ignore all other structure signals"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The practical maps Missing TL;DR to a summarization entry-point issue and recommends a concise product summary using safe wording."
+    },
+    {
+        "id":  "L5_1_Q17",
+        "question_text":  "Why are missing alt attributes relevant in the Isabella practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "They prove that the AI rejected the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "They automatically reduce every ranking outcome"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "They replace the need for product descriptions"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "They may weaken machine-readable image context and product understanding"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical frames missing alt attributes as an image-context risk, especially for multimedia interpretation and product understanding."
+    },
+    {
+        "id":  "L5_1_Q18",
+        "question_text":  "Which safe claim matches the Lesson 5.1 reporting discipline?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "This structure will make the AI choose the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "This signal caused AI absence"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "This structure may reduce interpretation ambiguity"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "This plugin issue proves lower AI visibility"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Lesson 5.1 separates readability risk from ranking proof and recommends cautious language such as \u0027may reduce interpretation ambiguity\u0027."
+    },
+    {
+        "id":  "L5_1_Q19",
+        "question_text":  "Which columns belong in the final Interpretation Risk Map deliverable?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Prompt length, token cost, model speed, and ad spend"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Observed plugin signal, possible processing issue, affected answer mode, AI-readability risk, recommended fix, safe wording, and limit of claim"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Backlinks, domain age, ad budget, and conversion rate"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only the plugin score and final recommendation"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The final deliverable moves from observed plugin signals to processing issues, affected answer modes, AI-readability risks, fixes, safe wording, and limits of claim."
+    },
+    {
+        "id":  "L5_1_Q20",
+        "question_text":  "What is the final practical takeaway of Lesson 5.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "The goal is to make the page safer to interpret, not to prove how AI used it"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The goal is to prove that AI ignored the page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The goal is to optimize only for one plugin score"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The goal is to replace classic SEO access checks"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The practical closes by saying the goal is not to prove how AI used the page, but to make the page safer to interpret."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 5.1 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 5.1 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 5.1.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 5.1 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 5.1 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 5.1 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
