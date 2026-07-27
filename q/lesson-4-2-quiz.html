@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4.2 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 4.2 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 4.2 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 4.2 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L4_2_Q1",
+        "question_text":  "What is the central distinction taught in Lesson 4.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "What we observe, what we infer heuristically, and what we can prove causally"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Technical SEO, content marketing, and paid search"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Prompt length, token cost, and model speed"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Schema type, image size, and backlink count"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Lesson 4.2 is built around separating observed signals, heuristic interpretations, and causal proof."
+    },
+    {
+        "id":  "L4_2_Q2",
+        "question_text":  "What is the lesson’s decision question?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Which AI model should always be trusted for GEO audits?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Which claims are heuristic, and where do we lack causal certainty?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Which plugin score guarantees citation?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Which page element should be optimized first in every case?"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson asks which statements are only heuristic and where causal certainty is missing."
+    },
+    {
+        "id":  "L4_2_Q3",
+        "question_text":  "In the executive frame, what should not be collapsed into one layer?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "SEO score and page title"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Homepage and product page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "What we see and why it happened"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Image alt text and video descriptions"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The executive frame separates visible signals from proposed explanations for why something happened."
+    },
+    {
+        "id":  "L4_2_Q4",
+        "question_text":  "Which of the following is an observed signal, according to Lesson 4.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "The model deliberately ignored the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The page was excluded because of one hidden ranking factor"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A missing citation or weak page structure that can be pointed to directly"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The plugin guarantees lower AI visibility"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Observed signals are directly visible or documented, such as missing citations, weak structure, unclear source visibility, or poor schema support."
+    },
+    {
+        "id":  "L4_2_Q5",
+        "question_text":  "What is a heuristic explanation in this lesson?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A guaranteed causal law about LLM behavior"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A plugin score that proves source selection"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A useful working interpretation, not a guaranteed cause"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A final answer copied directly from one source"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson defines heuristic interpretation as a useful working explanation that may guide action, but should not be treated as causal proof."
+    },
+    {
+        "id":  "L4_2_Q6",
+        "question_text":  "Which wording best fits a heuristic interpretation?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "May reduce extractability"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Proves the cause"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Guarantees citation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The AI ignored it because"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Lesson 4.2 recommends cautious language such as may suggest, may indicate, is consistent with, or could reduce extractability."
+    },
+    {
+        "id":  "L4_2_Q7",
+        "question_text":  "What makes a causal claim stronger than a heuristic interpretation?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It uses more confident language"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It appears in a plugin report"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It claims that one factor produced a specific outcome"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It refers to a known brand name"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "A causal claim says X caused Y, which requires much stronger support than a heuristic interpretation."
+    },
+    {
+        "id":  "L4_2_Q8",
+        "question_text":  "What minimum discipline does the lesson associate with causal claims?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A single plugin score and a strong recommendation"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A visible FAQ block and a short summary"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "One AI answer and a high-confidence explanation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Controlled comparison, repeated observation, clear scope, and known limits"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson says causal claims usually require controlled comparison, repeated testing or observation, clear scope, and known limits."
+    },
+    {
+        "id":  "L4_2_Q9",
+        "question_text":  "Why is causal certainty limited when interpreting LLM answers?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because all plugin reports are irrelevant"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because the final answer may hide or partially hide layers such as prompt context, retrieval, ranking, synthesis, safety rules, or tool behavior"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because summaries are always hallucinated"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because Product schema blocks all source selection"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson lists several hidden or partially visible layers behind the final answer, so the visible answer should not be treated as the full mechanism."
+    },
+    {
+        "id":  "L4_2_Q10",
+        "question_text":  "What is the plugin’s proper role in Lesson 4.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To prove why an LLM selected a source"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To certify business outcomes"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To inspect source visibility, structure quality, machine-readability clues, and reporting language risk"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To replace human decision review"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The plugin is positioned as an observation and interpretation support layer, not as causal proof."
+    },
+    {
+        "id":  "L4_2_Q11",
+        "question_text":  "In the observed / heuristic / causal mapping, what is safe from plugin evidence alone?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Only the causal claim"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only the business outcome claim"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The claim that ChatGPT ignored the page because of weak headings"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The observed signal and a cautious heuristic interpretation"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson’s mapping says the observed plugin signal and cautious heuristic interpretation are safe; the causal claim is not supported by plugin evidence alone."
+    },
+    {
+        "id":  "L4_2_Q12",
+        "question_text":  "Which phrase belongs in safe wording rules?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Creates a risk that"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Guarantees"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Caused"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "This proves"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Safe wording includes may suggest, is consistent with, creates a risk that, and should be tested against."
+    },
+    {
+        "id":  "L4_2_Q13",
+        "question_text":  "What is the risk of mistaking a heuristic for a causal law?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It automatically improves user value"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It makes source selection fully transparent"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It removes the need for retesting"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It can lead to over-optimization, signal hacking, and reporting overclaims"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson warns that false certainty may lead to bloated schema, repetitive answer-bait text, artificial FAQ blocks, and overconfident reporting."
+    },
+    {
+        "id":  "L4_2_Q14",
+        "question_text":  "Which question is part of the over-optimization avoidance checklist?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Can we guarantee the page will be cited?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Can we remove all uncertainty from the report?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Does the change improve user value and machine readability?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Can we raise the score without changing the page quality?"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The checklist asks whether a change improves user value, machine readability, and whether the limit of the claim can be explained."
+    },
+    {
+        "id":  "L4_2_Q15",
+        "question_text":  "When should the consultant stop and rewrite the recommendation?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "When the plugin shows any observed signal"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "When the page has Product schema"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "When the recommendation contains a retest plan"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "When the mechanism is hidden, the claim needs proof we do not have, or the change only improves a score"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Lesson 4.2 gives stop rules for hidden mechanisms, unsupported claims, and score-only changes."
+    },
+    {
+        "id":  "L4_2_Q16",
+        "question_text":  "What is the intended output of the Heuristic vs. Causality Memo?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A long theory document about LLM internals"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A decision-ready memo separating observation, heuristic interpretation, unsupported causal claims, recommended action, and stop rules"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A prompt that forces a model to cite the page"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A guarantee that AI visibility will improve"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The memo is meant to be decision-ready and concise, not theory-heavy or overconfident."
+    },
+    {
+        "id":  "L4_2_Q17",
+        "question_text":  "In the practical Isabella exercise, how should the SEO 86, GEO 31, and Overall 59 scores be interpreted?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "As proof that Isabella was ignored by AI systems"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "As guarantees of future citation"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "As signals for prioritization, not as causes"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "As evidence that no page changes are needed"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The practical says scores are signals, not causes, and should not be conflated with the underlying mechanism."
+    },
+    {
+        "id":  "L4_2_Q18",
+        "question_text":  "What is the safe interpretation of the missing TL;DR / Summary signal in the Isabella practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It proves that AI systems will not mention Isabella"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It guarantees that adding a summary will create citations"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It means the page cannot be summarized at all"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Adding a concise summary may improve answerability in summarization-style answers"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical frames missing TL;DR as a summarization-readiness issue, not as proof of source selection or absence."
+    },
+    {
+        "id":  "L4_2_Q19",
+        "question_text":  "What causal claim must be avoided when discussing the Isabella FAQ / FAQPage recommendation?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "FAQ schema will make AI systems recommend the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A structured FAQ may support Q\u0026A extraction"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The plugin recommends adding FAQPage structured data"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The FAQ should be tested across answer modes"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The practical warns that FAQPage may support extraction, but it does not guarantee recommendation by AI systems."
+    },
+    {
+        "id":  "L4_2_Q20",
+        "question_text":  "What is the final takeaway of Lesson 4.2 practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Plugin scores are enough to prove causality"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The safest GEO strategy is to optimize only for the score"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Product schema guarantees source selection"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Turn observed plugin / audit signals into safe, testable, decision-ready recommendations"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical closes by saying professional value comes from converting observed signals into cautious, testable, decision-ready language."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 4.2 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 4.2 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 4.2.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 4.2 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 4.2 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 4.2 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
