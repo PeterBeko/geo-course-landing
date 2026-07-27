@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6.3 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 6.3 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 6.3 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 6.3 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L6_3_Q1",
+        "question_text":  "What is the central purpose of Lesson 6.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To replace all GEO decision-making with one plugin score"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To turn the 6.1 decision playbook and 6.2 Narrative Attribution KPI into a repeatable GEO operating system"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To prove that structured data guarantees AI recommendation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To teach prompt tricks that force AI systems to cite a brand"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Lesson 6.3 translates the previous decision logic and KPI into operating components, cadence, ownership, runbooks, and retesting."
+    },
+    {
+        "id":  "L6_3_Q2",
+        "question_text":  "Why are useful artifacts not enough in a GEO operating model?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because plugin reports should never be used as evidence inputs"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because traffic charts are always more important than attribution quality"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because without cadence, ownership, evidence control, and decision rules, they become isolated artifacts instead of decision management"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because one prompt screenshot is enough to prove long-term GEO success"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson states that reports, screenshots, scorecards, and charts can be useful, but only when governed by an operating model."
+    },
+    {
+        "id":  "L6_3_Q3",
+        "question_text":  "Which output artifact does Lesson 6.3 create?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "GEO Operating System Blueprint (v1)"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Narrative Attribution Scorecard only"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A raw plugin warning list"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A one-prompt success screenshot"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The Lesson 6.3 output is the GEO Operating System Blueprint, which includes the operating model, cadence, runbook, RACI/governance, and closed measurement loop."
+    },
+    {
+        "id":  "L6_3_Q4",
+        "question_text":  "Which set contains the five core components of the GEO Operating System?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Keyword Planner, Backlink Index, Ad Platform, SERP Tracker, Traffic Chart"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "QueryBank Manager, Brand Integrity Engine, Evidence Package Registry, Observation \u0026 Scoring Engine, Governance Cadence \u0026 Runbook"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Meta Title Editor, Prompt Generator, Ranking Score, Schema Counter, Screenshot Folder"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Citation Counter, Model Selector, Plugin Score, Word Count, Social Share Tracker"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Lesson 6.3 defines five operating components that keep the 6.1 decision playbook and 6.2 KPI alive after the lesson."
+    },
+    {
+        "id":  "L6_3_Q5",
+        "question_text":  "What is the QueryBank Manager?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A prompt-hacking tool designed to force better AI answers"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A replacement for evidence packages and observation logs"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A traffic dashboard that measures only pageviews"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A controlled inventory of priority query contexts, prompts, intents, answer modes, cadence, owners, and decision rules"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The QueryBank Manager keeps priority query contexts stable enough to compare observations over time."
+    },
+    {
+        "id":  "L6_3_Q6",
+        "question_text":  "What is the QueryBank stop rule from Lesson 6.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Rewrite prompts after every answer until the brand appears"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Do not rewrite prompts just to get a nicer answer"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Use only one prompt and never repeat it"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Remove the business question before running the prompt set"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The stop rule protects the system from prompt manipulation and keeps the observation process stable."
+    },
+    {
+        "id":  "L6_3_Q7",
+        "question_text":  "What does the Brand Integrity Engine protect?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Only the number of times a brand is mentioned"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only the traffic trend after a page update"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The correct entity, claim, context, evidence role, and boundary in AI-visible answers"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only the visual style of the report dashboard"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The Brand Integrity Engine protects meaning, not just visibility."
+    },
+    {
+        "id":  "L6_3_Q8",
+        "question_text":  "What is the main role of the Evidence Package Registry?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To prove hidden model causality"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To store traceable evidence such as source pages, structured data, claim maps, disclaimers, plugin snapshots, and change logs"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To replace the need for scoring observations"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To guarantee future citation through metadata"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The Evidence Package Registry makes GEO auditable by storing the evidence behind each target narrative."
+    },
+    {
+        "id":  "L6_3_Q9",
+        "question_text":  "What is the safe technical framing for structured data and page structure in Lesson 6.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "They improve evidence quality and interpretability, but they do not guarantee AI citation or recommendation"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "They guarantee that AI systems will cite the page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "They replace source evidence, author signals, and provenance notes"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "They make prompt observations unnecessary"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The lesson uses structured data, sections, headings, metadata, and provenance as evidence-quality inputs, not as guarantees of future AI behavior."
+    },
+    {
+        "id":  "L6_3_Q10",
+        "question_text":  "How should the plugin report be used in Lesson 6.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "As a causal proof that AI systems will recommend the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "As a replacement for QueryBank observations"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "As an input layer that populates evidence tasks and interpretation risks, not as the final decision-maker"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "As the only KPI needed for executive reporting"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The plugin report is used to inspect evidence signals such as entity clarity, schema, headings, summaries, FAQ, sources, author/date signals, media context, links, and canonical clarity."
+    },
+    {
+        "id":  "L6_3_Q11",
+        "question_text":  "What should each observation record in the Observation \u0026 Scoring Engine?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Only a screenshot and the final traffic number"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Prompt, model or tool, date, answer mode, answer excerpt, entity role, claim carried, context class, source behavior, and score"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Only the answer length and the model name"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only whether the brand appeared once"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The Observation \u0026 Scoring Engine turns query runs into traceable decision signals."
+    },
+    {
+        "id":  "L6_3_Q12",
+        "question_text":  "Which scoring logic does Lesson 6.3 reuse from Lesson 6.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Score only keyword density and traffic growth"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Score Entity Alignment, Claim Accuracy, Context Fit, Attribution Clarity, and Decision Usefulness from 0 to 2, then classify Green / Yellow / Red"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Use one screenshot as the whole KPI trend"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Classify every mention as a green attribution win"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Lesson 6.3 operationalizes the 6.2 Narrative Attribution scorecard as a recurring scoring engine."
+    },
+    {
+        "id":  "L6_3_Q13",
+        "question_text":  "What is the minimal viable cadence recommended in Lesson 6.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Daily full redesign, hourly prompt rewriting, and permanent emergency escalation"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "One annual screenshot review only"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Weekly observation sweep, monthly evidence package refresh and backlog review, quarterly strategy review"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "No cadence until AI recommendations are guaranteed"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson recommends a lightweight operating rhythm before overbuilding the system."
+    },
+    {
+        "id":  "L6_3_Q14",
+        "question_text":  "What is the purpose of the closed measurement loop?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To produce one final score that never changes"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To connect observations, meaning checks, evidence, scoring, governance decisions, and retesting after change"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To remove ownership from GEO work"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To make the plugin the final decision authority"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The closed loop ensures that QueryBank observations lead to decisions such as continue, revise, escalate, stop, and retest."
+    },
+    {
+        "id":  "L6_3_Q15",
+        "question_text":  "Why does Lesson 6.3 include RACI governance?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "To remove the need for cadence"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "To prove AI model causality"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "To replace the evidence package"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "To clarify who performs the work, who is ultimately accountable, who is consulted, and who is informed"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "RACI prevents the system from becoming one person\u0027s private spreadsheet and assigns ownership across roles."
+    },
+    {
+        "id":  "L6_3_Q16",
+        "question_text":  "What does the runbook structure define for each routine?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Trigger, input, steps, output, owner, review cadence, and decision gate"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only the plugin score and final screenshot"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Only the page title and meta description"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only the model name and answer length"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The runbook makes the GEO operating system repeatable by defining the workflow for each routine."
+    },
+    {
+        "id":  "L6_3_Q17",
+        "question_text":  "In the Isabella practical, what is the operating question?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Whether Isabella can be proven to receive future AI recommendations"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Whether Isabella can be monitored as a defensible recommendation candidate in BR540-inspired alternative contexts without crossing the inspired-by boundary"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Whether Isabella should be described as officially affiliated with Baccarat Rouge 540"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Whether one screenshot is enough to close the GEO project"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The Isabella practical frames the work as a monitored operating pilot with safe boundaries."
+    },
+    {
+        "id":  "L6_3_Q18",
+        "question_text":  "What is the correct distinction between evidence and proof in the practical video?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Evidence proves permanent visibility if enough schema is added"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Evidence replaces retesting after change"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Evidence supports responsible observation, attribution scoring, decision support, and revision backlog, but it does not prove future AI recommendation or hidden model causality"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Evidence guarantees AI citation when stored in a workbook"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The practical video emphasizes that evidence makes decisions more responsible, but it does not prove future AI behavior."
+    },
+    {
+        "id":  "L6_3_Q19",
+        "question_text":  "What does the Decision Backlog do in the practical workflow?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It archives old screenshots without action"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It converts observations and evidence gaps into owned tasks, decisions, priorities, and retest requirements"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It replaces the need for a QueryBank"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It turns every yellow result into a guaranteed green result"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The backlog is where the operating loop closes because observations become action and follow-up measurement."
+    },
+    {
+        "id":  "L6_3_Q20",
+        "question_text":  "What is the final practical takeaway of Lesson 6.3?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "If the brand appears once, GEO success is proven"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "If it cannot be repeated, owned, scored, governed, and retested, it is not yet a GEO Operating System"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "If the plugin score improves, future AI recommendation is guaranteed"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "If a prompt works once, the operating loop can stop"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The practical closes with the idea that professional GEO is operated through routines, not guessed from screenshots."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 6.3 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 6.3 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 6.3.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 6.3 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 6.3 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 6.3 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
