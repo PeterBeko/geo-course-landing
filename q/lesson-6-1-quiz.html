@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6.1 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 6.1 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 6.1 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 6.1 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L6_1_Q1",
+        "question_text":  "What is the central shift in Lesson 6.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "From structured data to guaranteed AI citation"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "From technical fixes to automatic recommendation"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "From chasing AI outputs to defining observable conditions for citation or recommendation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "From entity clarity to ignoring answer modes"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Lesson 6.1 reframes the practitioner questions into controllable decision conditions: what makes citation or recommendation defensible, observable, and testable."
+    },
+    {
+        "id":  "L6_1_Q2",
+        "question_text":  "Which question is the professional reframing of \u0027How do I get AI to cite me?\u0027",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "What makes this page a safe, retrievable, and quotable source for a specific answer?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Which plugin score guarantees that the page will be cited?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "How many keywords should be added to force citation?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Which AI model can be reverse-engineered from one prompt?"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Citation readiness asks whether the page can support an answer through visible source value, extractable evidence, context fit, and attribution clarity."
+    },
+    {
+        "id":  "L6_1_Q3",
+        "question_text":  "Why does Lesson 6.1 connect citation readiness back to Module 4?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Because every AI output should be interpreted as citation behavior"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Because Module 4 proves exact source-selection causality"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Because answer modes no longer matter once a page is optimized"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Because you must identify the answer mode before diagnosing citation visibility"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "A response may summarize, synthesize, retrieve, cite, or answer from context. Citation is only one visible answer mode, so diagnosing citation first can overfit the wrong mechanism."
+    },
+    {
+        "id":  "L6_1_Q4",
+        "question_text":  "What does Module 5 add to the Lesson 6.1 citation-readiness logic?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "That citation readiness depends only on brand authority"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "That a source must remain interpretable when processed in fragments"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "That every technical change guarantees recommendation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "That plugin scores replace page structure"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Module 5 adds source readiness: clear structure, extractable claims, visible context, attribution signals, and technical stability help a page remain usable when parts are retrieved or summarized."
+    },
+    {
+        "id":  "L6_1_Q5",
+        "question_text":  "Which statement best describes quote-ready evidence in Lesson 6.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Citation can be forced by repeating the target phrase"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Any page with a FAQ is automatically quote-ready"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Useful evidence should be visible, extractable, attributable, and contextually stable"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Quote-ready evidence proves future AI citation"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson uses quote-ready evidence as a safe GEO principle: improve source usability, but do not claim that this forces citation."
+    },
+    {
+        "id":  "L6_1_Q6",
+        "question_text":  "What is the professional reframing of \u0027How do I get AI to recommend me?\u0027",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "How can I make every AI answer mention my brand?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Which hidden ranking factor guarantees the recommendation?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "How can I add more schema than competitors?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "When would this entity be a defensible recommendation for a specific user need?"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Recommendation readiness is about decision fit: whether the entity, offer, or brand can support a recommendation under a specific user need and comparison context."
+    },
+    {
+        "id":  "L6_1_Q7",
+        "question_text":  "What does entity consensus mean in Lesson 6.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "The page, product, brand, schema, reviews, references, claims, and disclaimers describe the same entity consistently"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Every page uses the same meta description"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The AI output mentions the entity once"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The plugin score is above a fixed threshold"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Recommendation becomes fragile when entity signals disagree. The page, schema, brand context, reviews, claims, and disclaimers must support a coherent entity."
+    },
+    {
+        "id":  "L6_1_Q8",
+        "question_text":  "What is the difference between citation readiness and recommendation readiness?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "They are two names for the same metric"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Citation readiness is about rankings; recommendation readiness is about crawl budget"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Citation readiness asks whether a page can support an answer; recommendation readiness asks whether an entity can support a decision"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Citation readiness always matters more than recommendation readiness"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The lesson separates source utility from decision fit. Citation and recommendation require different evidence sets and decision logic."
+    },
+    {
+        "id":  "L6_1_Q9",
+        "question_text":  "Which item belongs in the Citation Readiness Decision Playbook?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Pick the product with the largest review count without checking the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Add every possible schema type to maximize plugin score"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Ignore attribution if the answer sounds good"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Check whether the relevant evidence is extractable and clearly attributed"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Citation readiness asks whether the page is accessible, technically interpretable, extractable, clearly attributed, and stable enough to support an answer."
+    },
+    {
+        "id":  "L6_1_Q10",
+        "question_text":  "When should page-level citation micro-tuning stop?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Whenever an AI system does not cite the page once"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "When the page is clear and technically stable, but the observed answer mode or constraint may not be page-level citation"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Only after every competitor page has been rewritten"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Never; page-level tuning should continue indefinitely"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The stop rule prevents optimizing the wrong constraint. If the problem is answer mode, authority, entity consensus, or query context, more page-level citation tuning may be waste."
+    },
+    {
+        "id":  "L6_1_Q11",
+        "question_text":  "Which question belongs in the Recommendation Readiness Decision Playbook?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "What user need is being served, and what comparison set is implied?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "What single screenshot proves success?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "How can this page force exact citation?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Which score should replace business judgment?"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Recommendation readiness begins with the user need and comparison context, then checks entity attributes, supporting evidence, and unsafe recommendation risks."
+    },
+    {
+        "id":  "L6_1_Q12",
+        "question_text":  "Which wording is unsafe according to Lesson 6.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "This may strengthen conditions for recommendation under a specific user need"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "This is consistent with better decision support"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "This should be tested against controlled prompts"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "This will make AI recommend the brand"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson protects against overclaiming. Recommendation readiness is a decision condition, not a guarantee of future AI recommendation."
+    },
+    {
+        "id":  "L6_1_Q13",
+        "question_text":  "What are the first three steps of the Two Questions Decision Playbook?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Rewrite the page, submit it to AI, and claim success"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Add schema, wait for citation, and stop testing"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Identify the business question, select the correct evidence set, and apply a stop rule"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Choose a model, count mentions, and ignore user need"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The playbook starts by deciding whether the business goal is citation readiness or recommendation readiness, then chooses the correct evidence set and avoids optimizing the wrong constraint."
+    },
+    {
+        "id":  "L6_1_Q14",
+        "question_text":  "What is a canary validation loop in Lesson 6.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A proof that broad AI visibility has been achieved"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A method for replacing all audit work with one prompt"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A narrow, repeatable test that checks whether a specific prompt, context, or answer mode supports the next decision"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A guarantee that an entity will be recommended"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "A canary is directional evidence. It helps decide whether to continue, revise, stop, or escalate, but it is not broad proof of visibility."
+    },
+    {
+        "id":  "L6_1_Q15",
+        "question_text":  "What does evaluation discipline mean in Lesson 6.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Judging progress from one impressive AI answer"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Using defined criteria, controlled examples, repeated observations, and logged outcomes"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Ignoring answer mode because the output looks useful"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Replacing safe wording with stronger promises"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson translates evaluation thinking into GEO: progress is a pattern across logged observations, not a single screenshot."
+    },
+    {
+        "id":  "L6_1_Q16",
+        "question_text":  "In the Isabella practical, what is the better business question than \u0027Get AI visibility\u0027?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "How can we make the plugin score reach 100?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "How can we prove that AI systems use this exact page?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "How can we remove all comparison context?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "When users ask for Baccarat Rouge 540 alternatives, can Isabella be a defensible recommendation?"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The practical starts with a decision-relevant business question instead of a vague visibility goal."
+    },
+    {
+        "id":  "L6_1_Q17",
+        "question_text":  "What is the branch decision for Isabella in the Lesson 6.1 practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Citation readiness is the only issue"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Neither citation nor recommendation readiness applies"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Citation readiness is secondary and partially supportable; recommendation readiness is the primary branch"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The page already proves future AI recommendation"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Because the likely user question is comparative and decision-oriented, Isabella is primarily a recommendation-readiness case, while citation readiness remains a secondary support concern."
+    },
+    {
+        "id":  "L6_1_Q18",
+        "question_text":  "What does Prompt 1 test in the Lesson 6.1 practical: \u0027What does the Isabella page say about the scent profile?\u0027",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Whether the page can support an answer about visible scent-profile information"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Whether Isabella is the best product in all comparison sets"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Whether the AI will guarantee a citation in every answer"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Whether competitors should be ignored"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Prompt 1 is a citation / answer-support canary. It tests whether the page can support an answer using extractable page evidence."
+    },
+    {
+        "id":  "L6_1_Q19",
+        "question_text":  "What does Prompt 2 test in the Lesson 6.1 practical: \u0027Which Baccarat Rouge 540-inspired alternative should I consider, and why?\u0027",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Whether the page has a TL;DR block"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Whether scent notes can be summarized without comparison"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Whether the AI can quote the disclaimer"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Whether Isabella can support a recommendation decision inside a comparison context"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Prompt 2 is a recommendation / comparison canary. It tests whether Isabella is strong enough as a decision candidate compared with alternatives."
+    },
+    {
+        "id":  "L6_1_Q20",
+        "question_text":  "What is the final practical output of Lesson 6.1?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A guarantee that Isabella will be cited or recommended"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A Two Questions Decision Playbook that identifies the correct branch, evidence set, canary observations, safe conclusion, and next decision"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A raw list of plugin warnings copied into a report"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A one-prompt success screenshot"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The practical output is a decision playbook. It tells the learner whether to continue, revise, stop, or escalate without overclaiming AI behavior."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 6.1 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 6.1 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 6.1.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 6.1 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 6.1 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 6.1 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
