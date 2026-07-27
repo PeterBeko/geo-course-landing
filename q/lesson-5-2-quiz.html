@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 5.2 Quiz</title>
+  <style>
+    :root {
+      --bg: #102033;
+      --bg-soft: #163252;
+      --panel: rgba(255, 255, 255, 0.08);
+      --stroke: rgba(240, 240, 240, 0.16);
+      --text: #f0f0f0;
+      --muted: rgba(240, 240, 240, 0.72);
+      --accent: #4a90e2;
+      --accent-strong: #67a7f0;
+      --shadow: 0 22px 58px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+      --title-size: clamp(1.6rem, 2vw, 2rem);
+      --question-size: clamp(1.22rem, 1.45vw, 1.45rem);
+      --option-size: clamp(0.92rem, 1.05vw, 1rem);
+      --answer-size: clamp(1rem, 1.15vw, 1.1rem);
+      --body-size: 0.92rem;
+      --button-size: 0.95rem;
+      --label-size: 0.78rem;
+      --card-height: min(64vh, 500px);
+      --content-width: min(1100px, calc(100vw - 28px));
+      --transition: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 144, 226, 0.28), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(103, 167, 240, 0.18), transparent 28%),
+        linear-gradient(160deg, #09111c 0%, var(--bg) 46%, var(--bg-soft) 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 14px 14px 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.42;
+    }
+
+    .app-shell {
+      width: var(--content-width);
+      position: relative;
+      z-index: 1;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .course-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 144, 226, 0.45);
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      color: var(--text);
+      font-size: var(--label-size);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+      box-shadow: 0 0 16px rgba(103, 167, 240, 0.7);
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-size: var(--title-size);
+      font-weight: 700;
+      line-height: 1.04;
+      color: var(--text);
+    }
+
+    .score-badge {
+      min-width: 144px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quiz-stage {
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .stage-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-text,
+    .hint-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font: inherit;
+      font-size: var(--button-size);
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+      transform: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--text);
+      padding: 10px 16px;
+      box-shadow: 0 14px 28px rgba(74, 144, 226, 0.24);
+    }
+
+    .card-frame {
+      perspective: 1800px;
+      min-height: var(--card-height);
+    }
+
+    .card-flipper {
+      position: relative;
+      width: 100%;
+      min-height: var(--card-height);
+      transform-style: preserve-3d;
+      transition: transform var(--transition);
+    }
+
+    .card-flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .quiz-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 19px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(12, 25, 41, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .quiz-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -44% auto;
+      width: min(30vw, 210px);
+      height: min(30vw, 210px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.26), transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(74, 144, 226, 0.14);
+      border: 1px solid rgba(74, 144, 226, 0.38);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .question-panel,
+    .answer-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-text,
+    .answer-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      max-width: 28ch;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .option-card {
+      min-height: 88px;
+      padding: 12px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .option-card:hover {
+      border-color: rgba(103, 167, 240, 0.5);
+      background: rgba(74, 144, 226, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .option-card:focus-visible {
+      outline: 2px solid rgba(103, 167, 240, 0.95);
+      outline-offset: 2px;
+      border-color: rgba(103, 167, 240, 0.82);
+      background: rgba(74, 144, 226, 0.14);
+    }
+
+    .option-card.is-selected {
+      border-color: rgba(103, 167, 240, 0.88);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.24), rgba(74, 144, 226, 0.12));
+      box-shadow: 0 14px 26px rgba(74, 144, 226, 0.18);
+    }
+
+    .option-key,
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 11px;
+      background: rgba(74, 144, 226, 0.18);
+      border: 1px solid rgba(74, 144, 226, 0.28);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .option-card:hover .option-key,
+    .option-card:focus-visible .option-key,
+    .option-card.is-selected .option-key {
+      background: rgba(103, 167, 240, 0.28);
+      border-color: rgba(103, 167, 240, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .option-copy {
+      margin: 0;
+      font-size: var(--option-size);
+      line-height: 1.34;
+      color: var(--text);
+    }
+
+    .answer-panel {
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .answer-copy {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.38;
+      color: var(--text);
+      max-width: 54ch;
+    }
+
+    .answer-callout {
+      padding: 14px 15px 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      background: linear-gradient(180deg, rgba(74, 144, 226, 0.18), rgba(74, 144, 226, 0.08));
+      display: grid;
+      gap: 8px;
+      max-width: 820px;
+    }
+
+    .answer-label {
+      margin: 0;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: var(--body-size);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .selection-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-width: 122px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav-button strong {
+      font-size: 0.94rem;
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.15;
+      margin-bottom: 1px;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      place-content: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .empty-state p {
+      margin: 0 auto;
+      max-width: 38ch;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .completion-card {
+      justify-content: center;
+    }
+
+    .completion-panel {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .completion-title {
+      margin: 0;
+      font-size: var(--question-size);
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text);
+    }
+
+    .completion-score {
+      margin: 0;
+      font-size: var(--answer-size);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .completion-copy {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 54ch;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --title-size: clamp(1.45rem, 5.4vw, 1.7rem);
+        --question-size: clamp(1.08rem, 4vw, 1.24rem);
+        --option-size: clamp(0.9rem, 3.2vw, 0.98rem);
+        --answer-size: clamp(0.96rem, 3.2vw, 1.04rem);
+        --body-size: 0.88rem;
+        --card-height: auto;
+      }
+
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .course-header,
+      .stage-topbar,
+      .stage-footer {
+        align-items: stretch;
+      }
+
+      .course-header {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        text-align: left;
+      }
+
+      .quiz-stage {
+        padding: 10px;
+      }
+
+      .quiz-card {
+        padding: 15px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-frame,
+      .card-flipper {
+        min-height: max(520px, 68vh);
+      }
+
+      .answer-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .button-primary,
+      .nav-button {
+        width: 100%;
+      }
+
+      .nav-group {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="course-header">
+      <div>
+        <span class="course-kicker">Course Quiz</span>
+        <h1>Lesson 5.2 Flip Cards</h1>
+      </div>
+      <div class="score-badge" aria-live="polite">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="scoreValue">0 / 20</span>
+      </div>
+    </header>
+
+    <section class="quiz-stage" aria-labelledby="quizTitle">
+      <div class="stage-topbar">
+        <p class="status-text" id="statusText">Lesson 5.2 question 1 of 20. Choose an answer, then flip.</p>
+        <button class="button-primary" id="flipButton" type="button">Show answer</button>
+      </div>
+
+      <div id="quizContainer">
+        <div class="empty-state">
+          <h2 id="quizTitle">Loading Lesson 5.2 quiz</h2>
+          <p>Please wait while the quiz data is prepared.</p>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="nav-group">
+          <button class="nav-button" id="prevButton" type="button" disabled>
+            <span aria-hidden="true">&#8592;</span>
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Previous</strong>
+            </span>
+          </button>
+          <button class="nav-button" id="nextButton" type="button">
+            <span>
+              <span class="nav-label">Navigation</span>
+              <strong>Next</strong>
+            </span>
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <p class="hint-text">Tip: use the arrow keys to move between cards and the space bar to flip.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EMBEDDED_QUIZ_DATA = [
+    {
+        "id":  "L5_2_Q1",
+        "question_text":  "What is the central idea of Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Not every technical signal deserves the same action"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Every plugin issue should be fixed immediately"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Structured data guarantees AI recommendation"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Low plugin scores prove hidden AI behavior"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Lesson 5.2 teaches prioritization discipline: technical signals must be assessed by impact, effort, evidence, and interpretation value before becoming tasks."
+    },
+    {
+        "id":  "L5_2_Q2",
+        "question_text":  "What is the decision question of Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Which AI model should be trusted for technical SEO?"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Which technical fixes are worth doing now — and which are low-yield or speculative?"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "How can we prove exactly why an AI system ignored a page?"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Which score should always dominate the roadmap?"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The lesson asks which fixes deserve action now and which should be bundled, monitored, deferred, or stopped."
+    },
+    {
+        "id":  "L5_2_Q3",
+        "question_text":  "What is the main bridge from Lesson 5.1 to Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Structured data replaces all readability checks"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Plugin scores become business proof"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Interpretation risk becomes prioritization logic"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Classic crawling is no longer relevant"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "Lesson 5.1 identifies interpretation risks; Lesson 5.2 decides which of those risks should become prioritized technical action."
+    },
+    {
+        "id":  "L5_2_Q4",
+        "question_text":  "Which two dimensions form the executive frame in Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Prompt length and model speed"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Ad spend and conversion rate"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Brand voice and writing style"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Impact and effort"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "The lesson uses impact versus effort to decide whether a technical issue should be fixed now, planned, bundled, or stopped."
+    },
+    {
+        "id":  "L5_2_Q5",
+        "question_text":  "Which factors are included in the Impact side of the Impact vs. Effort frame?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Access, interpretation, trust, attribution, answerability, and business relevance"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "File size, color contrast, and background music"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Only plugin score and word count"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Only implementation time and maintenance cost"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Impact includes whether the issue affects access, interpretation, trust, attribution, answerability, or business relevance."
+    },
+    {
+        "id":  "L5_2_Q6",
+        "question_text":  "What is a Tier 1 technical signal in Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A cosmetic micro-formatting preference"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A blocking issue such as access, indexability, canonical clarity, severe rendering, or core entity failure"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Any recommendation labeled as info by a plugin"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A score-only tweak with no user value"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "Tier 1 means fix now: blocking access, indexability, canonical, severe rendering, or core entity/entity-purpose failures."
+    },
+    {
+        "id":  "L5_2_Q7",
+        "question_text":  "What is the correct interpretation of a plugin issue in Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It is an input that must be assessed before becoming a priority"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It is automatically a task"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It proves the exact AI mechanism"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It always belongs in Tier 1"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The practical starts from plugin issues, but converts them into tasks only after evidence, impact, effort, and interpretation value are assessed."
+    },
+    {
+        "id":  "L5_2_Q8",
+        "question_text":  "Which set best describes Tier 2 in Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Hidden AI mechanisms and guaranteed citation factors"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Only critical crawl failures"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Low-evidence cosmetic changes"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Useful value-building improvements such as TL;DR, FAQPage, alt text, freshness signals, source/date clarity, and structured support"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Tier 2 means improve next: valuable technical improvements that support answerability, interpretation, trust, or machine-readable clarity, but are not necessarily emergencies."
+    },
+    {
+        "id":  "L5_2_Q9",
+        "question_text":  "What belongs in Tier 3 according to the lesson?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Cosmetic tuning, score-only tweaks, or speculative AI-trigger chasing"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Severe rendering failure on a business-critical page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Canonical conflict that blocks interpretation of the main entity"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A high-impact low-effort fix"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "Tier 3 items should be batched, monitored, deferred, or stopped because they are low-yield, speculative, or score-only."
+    },
+    {
+        "id":  "L5_2_Q10",
+        "question_text":  "What does A-grade evidence mean in Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Anecdote and untested hypothesis"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Official documentation, standards bodies, or peer-reviewed research"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A single plugin score"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A subjective feeling that a fix is urgent"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "A-grade evidence is the strongest source class in this lesson: official documentation, standards bodies, and peer-reviewed research."
+    },
+    {
+        "id":  "L5_2_Q11",
+        "question_text":  "What is C-grade evidence in Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Official structured data documentation"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A standards-body specification"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A single plugin score, anecdote, or untested hypothesis"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A controlled comparison repeated across tools"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "C-grade evidence is weak evidence. It can inform observation, but should not dominate priority without stronger support."
+    },
+    {
+        "id":  "L5_2_Q12",
+        "question_text":  "What should happen to a high-impact, low-effort fix?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It should usually move first or be fixed soon"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It should always be ignored"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It should be treated as causal proof"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It should be delayed until every speculative issue is solved"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The prioritization matrix places high-impact / low-effort fixes in the fix-now or fix-soon category."
+    },
+    {
+        "id":  "L5_2_Q13",
+        "question_text":  "What should usually happen to a low-impact, high-effort technical change?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It should become Tier 1 immediately"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It should be treated as proof of AI absence"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It should replace the technical priority memo"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It should stop or be deferred unless stronger evidence or business context justifies it"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Low-impact / high-effort work should be stopped, deferred, or require stronger evidence before consuming resources."
+    },
+    {
+        "id":  "L5_2_Q14",
+        "question_text":  "How should structured data be prioritized in Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "It should be added everywhere to chase the plugin score"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "It should be ignored because schema never matters"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "It guarantees AI recommendation when added"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "It is high priority only when it supports a meaningful interpretation need and represents real page content"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Structured data is useful when it clarifies real entities, offers, reviews, claims, dates, authors, provenance, or relationships. It is not a guarantee."
+    },
+    {
+        "id":  "L5_2_Q15",
+        "question_text":  "In the Isabella practical, how should Product JSON-LD present be handled?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "As proof that AI systems selected the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "As a monitor / verify item: check that structured data represents real visible page content"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "As an automatic Tier 1 emergency"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "As a reason to remove visible product descriptions"
+                        }
+                    ],
+        "correct_answer_key":  "B",
+        "explanation":  "The practical treats Product JSON-LD present as something to verify, not a fix by itself and not proof of AI source selection."
+    },
+    {
+        "id":  "L5_2_Q16",
+        "question_text":  "Which safe recommendation matches the missing alt attributes example?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Improved alt text may strengthen machine-readable image context"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Alt text proves that AI selected the image"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "Missing alt text caused the page to disappear from AI answers"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Alt text guarantees higher ranking"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The practical maps missing alt attributes to image context / interpretation and uses safe wording, not causal proof."
+    },
+    {
+        "id":  "L5_2_Q17",
+        "question_text":  "How should freshness and attribution signals be framed?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "They prove why an AI system selected or ignored the page"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "They always create Tier 1 emergencies"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "They are irrelevant to GEO technical work"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "They may improve freshness, attribution, and accountability clarity, especially when claims or comparisons matter"
+                        }
+                    ],
+        "correct_answer_key":  "D",
+        "explanation":  "Lesson 5.2 frames date, source, author, and provenance signals as clarity and trust-supporting signals, not proof of AI behavior."
+    },
+    {
+        "id":  "L5_2_Q18",
+        "question_text":  "Which item is a stop rule for technical micro-tuning?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "The fix only improves a score and does not improve user value or interpretation clarity"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "The fix protects access on a critical page"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The fix improves answerability for real product questions"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "The fix clarifies the main entity"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The lesson stops tuning when the change is score-only, depends on hidden AI behavior, has weak evidence, has unclear impact, or does not improve user value or interpretation clarity."
+    },
+    {
+        "id":  "L5_2_Q19",
+        "question_text":  "What is the final deliverable of the Lesson 5.2 practical?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "A raw issue dump copied from the plugin"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "A prompt library for reverse-engineering AI behavior"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "A technical priority memo with tiered actions, rationale, safe wording, and limits of claim"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "A guarantee of AI visibility after technical fixes"
+                        }
+                    ],
+        "correct_answer_key":  "C",
+        "explanation":  "The final output is a decision-ready technical roadmap or memo, not a raw list of issues."
+    },
+    {
+        "id":  "L5_2_Q20",
+        "question_text":  "What is the final practical takeaway of Lesson 5.2?",
+        "options":  [
+                        {
+                            "key":  "A",
+                            "text":  "Critical technical signals deserve action; low-yield signals deserve discipline"
+                        },
+                        {
+                            "key":  "B",
+                            "text":  "Every plugin issue deserves immediate engineering time"
+                        },
+                        {
+                            "key":  "C",
+                            "text":  "The loudest metric should dominate the roadmap"
+                        },
+                        {
+                            "key":  "D",
+                            "text":  "Technical priority is causal proof"
+                        }
+                    ],
+        "correct_answer_key":  "A",
+        "explanation":  "The lesson closes by emphasizing disciplined technical prioritization: focus on access, interpretation, user value, and decision quality without chasing unsupported mechanisms."
+    }
+];
+    const state = {
+      questions: [],
+      currentIndex: 0,
+      flipped: false,
+      selections: {}
+    };
+
+    const elements = {
+      quizContainer: document.getElementById("quizContainer"),
+      scoreValue: document.getElementById("scoreValue"),
+      statusText: document.getElementById("statusText"),
+      flipButton: document.getElementById("flipButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton")
+    };
+
+    function sanitizeQuizData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error("Quiz JSON must contain an array of questions.");
+      }
+
+      return data
+        .map((item, index) => {
+          const options = Array.isArray(item.options) ? item.options : [];
+          return {
+            id: item.id || "QUESTION_" + String(index + 1).padStart(2, "0"),
+            question_text: item.question_text || "Untitled question",
+            options: options.map((option, optionIndex) => ({
+              key: option.key || String.fromCharCode(65 + optionIndex),
+              text: option.text || "Missing option text"
+            })),
+            correct_answer_key: item.correct_answer_key || "",
+            explanation: item.explanation || "This answer follows the lesson's causal framing and separates observed evidence from unsupported certainty."
+          };
+        })
+        .filter((item) => item.options.length > 0);
+    }
+
+    function getCurrentQuestion() {
+      return state.questions[state.currentIndex];
+    }
+
+    function getCorrectOption(question) {
+      return question.options.find((option) => option.key === question.correct_answer_key) || null;
+    }
+
+    function getSelectedKey(questionId) {
+      return state.selections[questionId] || "";
+    }
+
+    function getScore() {
+      return state.questions.reduce((count, question) => {
+        return count + (getSelectedKey(question.id) === question.correct_answer_key ? 1 : 0);
+      }, 0);
+    }
+
+    function selectAnswer(questionId, optionKey) {
+      state.selections[questionId] = optionKey;
+      renderCard();
+    }
+
+    function isCompletionScreen() {
+      return state.currentIndex >= state.questions.length && state.questions.length > 0;
+    }
+
+    function restartQuiz() {
+      state.currentIndex = 0;
+      state.flipped = false;
+      state.selections = {};
+      renderCard();
+    }
+
+    function renderOptions(question) {
+      const selectedKey = getSelectedKey(question.id);
+      return question.options.map((option) => {
+        const isSelected = selectedKey === option.key;
+        return `
+          <button
+            class="option-card${isSelected ? " is-selected" : ""}"
+            type="button"
+            data-question-id="${escapeHtml(question.id)}"
+            data-option-key="${escapeHtml(option.key)}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            <span class="option-key">${escapeHtml(option.key)}</span>
+            <p class="option-copy">${escapeHtml(option.text)}</p>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectionNote(question) {
+      const selectedKey = getSelectedKey(question.id);
+      if (!selectedKey) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      const selectedOption = question.options.find((option) => option.key === selectedKey);
+      if (!selectedOption) {
+        return '<p class="selection-note">No answer selected yet.</p>';
+      }
+
+      return `<p class="selection-note">Your selection: ${escapeHtml(selectedOption.key)}. ${escapeHtml(selectedOption.text)}</p>`;
+    }
+
+    function renderCard() {
+      if (!state.questions.length) {
+        elements.quizContainer.innerHTML = `
+          <div class="empty-state">
+            <h2 id="quizTitle">No quiz data available</h2>
+            <p>The embedded quiz data is empty or invalid.</p>
+          </div>
+        `;
+        updateChrome();
+        return;
+      }
+
+      if (isCompletionScreen()) {
+        const score = getScore();
+        const total = state.questions.length;
+
+        elements.quizContainer.innerHTML = `
+          <div class="card-frame">
+            <section class="quiz-card completion-card" aria-label="Lesson 5.2 quiz complete">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Course Quiz Complete</span>
+              </div>
+              <div class="completion-panel">
+                <h2 class="completion-title" id="quizTitle">Quiz Complete</h2>
+                <p class="completion-score">You answered ${score} out of ${total} correctly.</p>
+                <p class="completion-copy">Thank you for completing this Lesson 5.2 quiz.
+I hope it helped reinforce the key ideas from this lesson.
+I look forward to seeing you in the next lesson.</p>
+              </div>
+              <div class="card-footer">
+                <button class="button-primary" id="restartButton" type="button">Restart Quiz</button>
+              </div>
+            </section>
+          </div>
+        `;
+
+        const restartButton = document.getElementById("restartButton");
+        if (restartButton) {
+          restartButton.addEventListener("click", restartQuiz);
+        }
+
+        updateChrome();
+        return;
+      }
+
+      const question = getCurrentQuestion();
+      const correctOption = getCorrectOption(question);
+      const correctText = correctOption ? correctOption.text : "Correct answer not found in options.";
+
+      elements.quizContainer.innerHTML = `
+        <div class="card-frame">
+          <div class="card-flipper${state.flipped ? " is-flipped" : ""}" id="cardFlipper">
+            <section class="quiz-card card-front" aria-label="Question side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Question</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="question-panel">
+                <h2 class="question-text" id="quizTitle">${escapeHtml(question.question_text)}</h2>
+                <div class="options-grid">
+                  ${renderOptions(question)}
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Choose an option, then flip to reveal the explanation.</p>
+              </div>
+            </section>
+
+            <section class="quiz-card card-back" aria-label="Answer side">
+              <div class="card-eyebrow">
+                <span class="eyebrow-pill">Answer</span>
+                <span class="card-id">${escapeHtml(question.id)}</span>
+              </div>
+              <div class="answer-panel">
+                <h2 class="answer-title">Correct answer</h2>
+                <div class="answer-header">
+                  <span class="answer-key">${escapeHtml(question.correct_answer_key || "?")}</span>
+                  <p class="answer-copy">${escapeHtml(correctText)}</p>
+                </div>
+                ${renderSelectionNote(question)}
+                <div class="answer-callout">
+                  <p class="answer-label">Explanation</p>
+                  <p class="answer-text">${escapeHtml(question.explanation)}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p class="hint-text">Use Previous and Next to move through Lesson 5.2.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+
+      elements.quizContainer.querySelectorAll(".option-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectAnswer(button.dataset.questionId, button.dataset.optionKey);
+        });
+      });
+
+      updateChrome();
+    }
+
+    function updateChrome() {
+      const total = state.questions.length;
+      const completion = isCompletionScreen();
+      const current = total && !completion ? state.currentIndex + 1 : 0;
+      const question = total && !completion ? getCurrentQuestion() : null;
+      const selectedKey = question ? getSelectedKey(question.id) : "";
+      const score = getScore();
+
+      elements.scoreValue.textContent = total ? score + " / " + total : "0 / 0";
+      if (!total) {
+        elements.statusText.textContent = "No valid Lesson 5.2 quiz data available.";
+      } else if (completion) {
+        elements.statusText.textContent = "Lesson 5.2 quiz complete.";
+      } else {
+        elements.statusText.textContent = "Lesson 5.2 question " + current + " of " + total + "." + (selectedKey ? " Selected: " + selectedKey + "." : " Choose an answer, then flip.");
+      }
+      elements.flipButton.textContent = state.flipped ? "Back to question" : "Show answer";
+      elements.prevButton.disabled = total === 0 || state.currentIndex === 0;
+      elements.nextButton.disabled = total === 0;
+      elements.flipButton.disabled = total === 0 || completion;
+      elements.flipButton.hidden = completion;
+      elements.nextButton.hidden = completion;
+    }
+
+    function goToQuestion(nextIndex) {
+      if (nextIndex < 0 || nextIndex > state.questions.length) {
+        return;
+      }
+
+      state.currentIndex = nextIndex;
+      state.flipped = false;
+      renderCard();
+    }
+
+    function toggleFlip() {
+      if (!state.questions.length || isCompletionScreen()) {
+        return;
+      }
+
+      state.flipped = !state.flipped;
+      const flipper = document.getElementById("cardFlipper");
+      if (flipper) {
+        flipper.classList.toggle("is-flipped", state.flipped);
+      }
+      updateChrome();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initialize() {
+      state.questions = sanitizeQuizData(EMBEDDED_QUIZ_DATA);
+      renderCard();
+    }
+
+    elements.flipButton.addEventListener("click", toggleFlip);
+    elements.prevButton.addEventListener("click", () => goToQuestion(state.currentIndex - 1));
+    elements.nextButton.addEventListener("click", () => goToQuestion(state.currentIndex + 1));
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextField = target && /input|textarea|select/i.test(target.tagName);
+      const isButton = target && typeof target.closest === "function" && target.closest("button");
+
+      if (isTextField) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToQuestion(state.currentIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goToQuestion(state.currentIndex + 1);
+      } else if ((event.key === " " || event.key === "Enter") && !isButton) {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
