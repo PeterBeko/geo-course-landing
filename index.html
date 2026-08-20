@@ -44,26 +44,7 @@
     });
 
     gtag('set', 'ads_data_redaction', true);
-
-    function updateGoogleConsentFromCookiebot() {
-      if (!window.Cookiebot || typeof window.gtag !== 'function') {
-        return;
-      }
-
-      gtag('consent', 'update', {
-        ad_storage: Cookiebot.consent.marketing ? 'granted' : 'denied',
-        analytics_storage: Cookiebot.consent.statistics ? 'granted' : 'denied',
-        ad_user_data: Cookiebot.consent.marketing ? 'granted' : 'denied',
-        ad_personalization: Cookiebot.consent.marketing ? 'granted' : 'denied',
-        functionality_storage: Cookiebot.consent.preferences ? 'granted' : 'denied',
-        personalization_storage: Cookiebot.consent.preferences ? 'granted' : 'denied',
-        security_storage: 'granted'
-      });
-    }
-
-    window.addEventListener('CookiebotOnConsentReady', updateGoogleConsentFromCookiebot);
-    window.addEventListener('CookiebotOnAccept', updateGoogleConsentFromCookiebot);
-    window.addEventListener('CookiebotOnDecline', updateGoogleConsentFromCookiebot);
+    gtag('set', 'url_passthrough', false);
   </script>
   <script async data-cookieconsent="ignore" src="https://www.googletagmanager.com/gtag/js?id=G-MK1WCW3K7T"></script>
   <script data-cookieconsent="ignore">
