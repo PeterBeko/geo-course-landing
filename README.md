@@ -21,6 +21,15 @@ Static live sales landing page for `course.audituniversepro.com`.
 - Purchase destination: `https://payhip.com/b/qLWwc`
 - Free resource: AI Visibility Triage via MailerLite embed
 
+## Analytics and consent
+
+- GA4 measurement is handled through `G-MK1WCW3K7T`.
+- Cookiebot manages site consent.
+- Cookiebot CBID `b3fb07c6-2cf8-43d1-b99d-636c72f38f64` is the configured public CMP identifier.
+- Payhip separately uses the same GA4 Measurement ID.
+- Live validation should be performed with Cookiebot verification and Google Tag Assistant.
+- No secrets are stored in the repository.
+
 ## DNS and GitHub Pages setup
 
 1. In the DNS provider, create a CNAME record:
