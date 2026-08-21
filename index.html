@@ -29,18 +29,7 @@
       functionality_storage: 'denied',
       personalization_storage: 'denied',
       security_storage: 'granted',
-      wait_for_update: 500,
-      region: ['AT','BE','BG','CH','CY','CZ','DE','DK','EE','ES','FI','FR','GB','GG','GR','HR','HU','IE','IM','IS','IT','JE','LI','LT','LU','LV','MT','NL','NO','PL','PT','RO','SE','SI','SK']
-    });
-
-    gtag('consent', 'default', {
-      ad_storage: 'granted',
-      analytics_storage: 'granted',
-      ad_user_data: 'granted',
-      ad_personalization: 'granted',
-      functionality_storage: 'granted',
-      personalization_storage: 'granted',
-      security_storage: 'granted'
+      wait_for_update: 500
     });
 
     gtag('set', 'ads_data_redaction', true);
@@ -56,6 +45,23 @@
           data-cbid="b3fb07c6-2cf8-43d1-b99d-636c72f38f64"
           data-blockingmode="auto"
           type="text/javascript"></script>
+  <!-- Meta Pixel Code -->
+  <script type="text/plain" data-cookieconsent="marketing">
+    if (!window.__aupMetaPixelInitialized) {
+      window.__aupMetaPixelInitialized = true;
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1024464877094858');
+      fbq('track', 'PageView');
+    }
+  </script>
+  <!-- End Meta Pixel Code -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -147,12 +153,15 @@
   }
   </script>
   <!-- MailerLite Universal -->
-  <script>
-    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-    ml('account', '2505582');
+  <script type="text/plain" data-cookieconsent="marketing">
+    if (!window.__aupMailerLiteLoaded) {
+      window.__aupMailerLiteLoaded = true;
+      (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+      .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+      n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+      (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+      ml('account', '2505582');
+    }
   </script>
   <!-- End MailerLite Universal -->
   <script defer src="script.js"></script>
