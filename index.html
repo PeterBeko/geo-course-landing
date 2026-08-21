@@ -29,33 +29,75 @@
       functionality_storage: 'denied',
       personalization_storage: 'denied',
       security_storage: 'granted',
-      wait_for_update: 500,
-      region: ['AT','BE','BG','CH','CY','CZ','DE','DK','EE','ES','FI','FR','GB','GG','GR','HR','HU','IE','IM','IS','IT','JE','LI','LT','LU','LV','MT','NL','NO','PL','PT','RO','SE','SI','SK']
-    });
-
-    gtag('consent', 'default', {
-      ad_storage: 'granted',
-      analytics_storage: 'granted',
-      ad_user_data: 'granted',
-      ad_personalization: 'granted',
-      functionality_storage: 'granted',
-      personalization_storage: 'granted',
-      security_storage: 'granted'
+      wait_for_update: 500
     });
 
     gtag('set', 'ads_data_redaction', true);
     gtag('set', 'url_passthrough', false);
-  </script>
-  <script async data-cookieconsent="ignore" src="https://www.googletagmanager.com/gtag/js?id=G-MK1WCW3K7T"></script>
-  <script data-cookieconsent="ignore">
-    gtag('js', new Date());
-    gtag('config', 'G-MK1WCW3K7T');
   </script>
   <script id="Cookiebot"
           src="https://consent.cookiebot.com/uc.js"
           data-cbid="b3fb07c6-2cf8-43d1-b99d-636c72f38f64"
           data-blockingmode="auto"
           type="text/javascript"></script>
+  <script async data-cookieconsent="ignore" src="https://www.googletagmanager.com/gtag/js?id=G-MK1WCW3K7T"></script>
+  <script data-cookieconsent="ignore">
+    gtag('js', new Date());
+    gtag('config', 'G-MK1WCW3K7T');
+  </script>
+  <script data-cookieconsent="ignore">
+    function aupHasMarketingConsent() {
+      return Boolean(window.Cookiebot && Cookiebot.consent && Cookiebot.consent.marketing);
+    }
+
+    function aupSyncMetaConsent() {
+      if (typeof window.fbq !== 'function') {
+        return;
+      }
+
+      fbq('consent', aupHasMarketingConsent() ? 'grant' : 'revoke');
+    }
+
+    function aupSyncConsentUi() {
+      var cards = document.querySelectorAll('[data-consent-managed-form]');
+      cards.forEach(function(card) {
+        card.classList.toggle('has-marketing-consent', aupHasMarketingConsent());
+      });
+    }
+
+    function aupSyncConsentState() {
+      aupSyncMetaConsent();
+      aupSyncConsentUi();
+    }
+
+    window.addEventListener('CookiebotOnConsentReady', aupSyncConsentState);
+    window.addEventListener('CookiebotOnAccept', aupSyncConsentState);
+    window.addEventListener('CookiebotOnDecline', aupSyncConsentState);
+    document.addEventListener('DOMContentLoaded', aupSyncConsentUi);
+  </script>
+  <!-- Meta Pixel Code -->
+  <script type="text/plain" data-cookieconsent="marketing">
+    if (!window.__aupMetaPixelInitialized) {
+      window.__aupMetaPixelInitialized = true;
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('consent', 'grant');
+      fbq('init', '1024464877094858');
+      if (!window.__aupMetaPageViewSent) {
+        window.__aupMetaPageViewSent = true;
+        fbq('track', 'PageView');
+      }
+    } else if (typeof window.fbq === 'function') {
+      fbq('consent', 'grant');
+    }
+  </script>
+  <!-- End Meta Pixel Code -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -147,12 +189,15 @@
   }
   </script>
   <!-- MailerLite Universal -->
-  <script>
-    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-    ml('account', '2505582');
+  <script type="text/plain" data-cookieconsent="marketing">
+    if (!window.__aupMailerLiteLoaded) {
+      window.__aupMailerLiteLoaded = true;
+      (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+      .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+      n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+      (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+      ml('account', '2505582');
+    }
   </script>
   <!-- End MailerLite Universal -->
   <script defer src="script.js"></script>
@@ -264,10 +309,14 @@
             <li>Set the first monthly baseline.</li>
           </ul>
         </div>
-        <div id="triage" class="form-card reveal" aria-labelledby="form-title">
+        <div id="triage" class="form-card consent-managed-form reveal" aria-labelledby="form-title" data-consent-managed-form>
           <h2 id="form-title">Get the free AI Visibility Triage.</h2>
           <p>You'll receive it in your inbox.</p>
           <div class="ml-embedded" data-form="h9bPYz"></div>
+          <div class="consent-fallback" data-consent-fallback="marketing">
+            <p>To load the signup form, enable Marketing cookies.</p>
+            <button class="text-link consent-settings-button" type="button" onclick="if (window.Cookiebot) Cookiebot.renew();">Manage cookie preferences</button>
+          </div>
         </div>
       </div>
     </section>
