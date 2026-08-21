@@ -34,6 +34,8 @@ The MailerLite Universal loader remains configured with:
 
 The loader is disabled by default with `type="text/plain"` and only enabled by Cookiebot after marketing consent. This prevents MailerLite marketing storage such as `ml_guid` from being created before marketing consent.
 
+When marketing consent is absent, the form card shows a non-tracking fallback message and a button that opens Cookiebot preferences. The fallback does not submit data, does not imply consent, and disappears when marketing consent is present and the embedded MailerLite form can load.
+
 ## Consent category matrix
 
 | Category | GA4 | MailerLite | Meta Pixel |
@@ -45,15 +47,16 @@ The loader is disabled by default with `type="text/plain"` and only enabled by C
 ## Script loading order
 
 1. Google Consent Mode bootstrap with denied defaults and `data-cookieconsent="ignore"`.
-2. Google tag `gtag.js` for `G-MK1WCW3K7T`, also ignored by Cookiebot so Consent Mode can govern it.
-3. GA4 config call.
-4. Cookiebot CMP with automatic blocking.
-5. Cookiebot-gated Meta Pixel script, requiring marketing consent.
-6. JSON-LD structured data.
-7. Cookiebot-gated MailerLite Universal loader, requiring marketing consent.
-8. Site `script.js`.
+2. Cookiebot CMP with automatic blocking.
+3. Google tag `gtag.js` for `G-MK1WCW3K7T`, also ignored by Cookiebot so Consent Mode can govern it.
+4. GA4 config call.
+5. Local consent-state helper for Meta consent synchronization and form fallback UI.
+6. Cookiebot-gated Meta Pixel script, requiring marketing consent.
+7. JSON-LD structured data.
+8. Cookiebot-gated MailerLite Universal loader, requiring marketing consent.
+9. Site `script.js`.
 
-This order keeps Consent Mode defaults before Google measurement, keeps Cookiebot as the CMP, and prevents non-Google marketing scripts from running before marketing consent.
+This order reconciles the two first-party requirements: Consent Mode defaults execute before `gtag.js`, while the Cookiebot CMP loads before cookie-setting resources and controls consent-gated marketing scripts.
 
 ## Cookiebot event/callback mechanism used
 
@@ -64,6 +67,13 @@ The implementation relies on Cookiebot's documented prior-consent script executi
 
 No custom Google consent update listener is used. Cookiebot's direct CMP integration sends the appropriate Google Consent Mode signals after consent submission. Cookiebot executes marked scripts when the required consent category is present.
 
+The local helper listens to `CookiebotOnConsentReady`, `CookiebotOnAccept` and `CookiebotOnDecline` only for non-Google behaviors:
+
+- it calls Meta Pixel consent `grant` or `revoke` after `fbq` exists;
+- it toggles the MailerLite fallback UI based on marketing consent.
+
+It does not send custom Google Consent Mode updates.
+
 ## Idempotence safeguards
 
 The gated loaders include guards:
@@ -72,6 +82,15 @@ The gated loaders include guards:
 - `window.__aupMailerLiteLoaded`
 
 These prevent duplicate Meta bootstrap/init/PageView calls and duplicate MailerLite loader/account initialization if Cookiebot executes consent-gated tags more than once during a session.
+
+The Meta Pixel lifecycle is:
+
+- before initial marketing consent, `fbevents.js` is not loaded and no Meta PageView can be sent;
+- when marketing consent is granted and Cookiebot executes the gated script, the Pixel is initialized once, Meta consent is granted, and one PageView is sent;
+- if marketing consent is later withdrawn in the same session, the helper calls `fbq('consent', 'revoke')` when `fbq` exists;
+- if marketing consent is re-granted, the helper calls `fbq('consent', 'grant')` without reinitializing the Pixel or sending a second automatic PageView.
+
+Google and Cookiebot documentation supports region-specific consent defaults plus a general fallback. This PR deliberately uses global denied defaults as a conservative privacy baseline during the measurement-validation phase, not because region-specific defaults are inherently invalid.
 
 ## Testing procedure
 

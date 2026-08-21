@@ -35,16 +35,46 @@
     gtag('set', 'ads_data_redaction', true);
     gtag('set', 'url_passthrough', false);
   </script>
-  <script async data-cookieconsent="ignore" src="https://www.googletagmanager.com/gtag/js?id=G-MK1WCW3K7T"></script>
-  <script data-cookieconsent="ignore">
-    gtag('js', new Date());
-    gtag('config', 'G-MK1WCW3K7T');
-  </script>
   <script id="Cookiebot"
           src="https://consent.cookiebot.com/uc.js"
           data-cbid="b3fb07c6-2cf8-43d1-b99d-636c72f38f64"
           data-blockingmode="auto"
           type="text/javascript"></script>
+  <script async data-cookieconsent="ignore" src="https://www.googletagmanager.com/gtag/js?id=G-MK1WCW3K7T"></script>
+  <script data-cookieconsent="ignore">
+    gtag('js', new Date());
+    gtag('config', 'G-MK1WCW3K7T');
+  </script>
+  <script data-cookieconsent="ignore">
+    function aupHasMarketingConsent() {
+      return Boolean(window.Cookiebot && Cookiebot.consent && Cookiebot.consent.marketing);
+    }
+
+    function aupSyncMetaConsent() {
+      if (typeof window.fbq !== 'function') {
+        return;
+      }
+
+      fbq('consent', aupHasMarketingConsent() ? 'grant' : 'revoke');
+    }
+
+    function aupSyncConsentUi() {
+      var cards = document.querySelectorAll('[data-consent-managed-form]');
+      cards.forEach(function(card) {
+        card.classList.toggle('has-marketing-consent', aupHasMarketingConsent());
+      });
+    }
+
+    function aupSyncConsentState() {
+      aupSyncMetaConsent();
+      aupSyncConsentUi();
+    }
+
+    window.addEventListener('CookiebotOnConsentReady', aupSyncConsentState);
+    window.addEventListener('CookiebotOnAccept', aupSyncConsentState);
+    window.addEventListener('CookiebotOnDecline', aupSyncConsentState);
+    document.addEventListener('DOMContentLoaded', aupSyncConsentUi);
+  </script>
   <!-- Meta Pixel Code -->
   <script type="text/plain" data-cookieconsent="marketing">
     if (!window.__aupMetaPixelInitialized) {
@@ -57,8 +87,14 @@
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('consent', 'grant');
       fbq('init', '1024464877094858');
-      fbq('track', 'PageView');
+      if (!window.__aupMetaPageViewSent) {
+        window.__aupMetaPageViewSent = true;
+        fbq('track', 'PageView');
+      }
+    } else if (typeof window.fbq === 'function') {
+      fbq('consent', 'grant');
     }
   </script>
   <!-- End Meta Pixel Code -->
@@ -273,10 +309,14 @@
             <li>Set the first monthly baseline.</li>
           </ul>
         </div>
-        <div id="triage" class="form-card reveal" aria-labelledby="form-title">
+        <div id="triage" class="form-card consent-managed-form reveal" aria-labelledby="form-title" data-consent-managed-form>
           <h2 id="form-title">Get the free AI Visibility Triage.</h2>
           <p>You'll receive it in your inbox.</p>
           <div class="ml-embedded" data-form="h9bPYz"></div>
+          <div class="consent-fallback" data-consent-fallback="marketing">
+            <p>To load the signup form, enable Marketing cookies.</p>
+            <button class="text-link consent-settings-button" type="button" onclick="if (window.Cookiebot) Cookiebot.renew();">Manage cookie preferences</button>
+          </div>
         </div>
       </div>
     </section>
