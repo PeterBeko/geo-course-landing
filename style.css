@@ -646,6 +646,22 @@ details p {
   text-underline-offset: 0.25em;
 }
 
+.related-research {
+  margin-top: clamp(1.5rem, 4vw, 2.25rem);
+  padding-top: clamp(1.2rem, 3vw, 1.75rem);
+  border-top: 1px solid var(--line);
+}
+
+.related-research .eyebrow {
+  margin-bottom: 0.55rem;
+  color: var(--blue);
+}
+
+.related-research p {
+  max-width: 34rem;
+  color: var(--muted);
+}
+
 .evidence-board {
   overflow: hidden;
   padding: 0;
